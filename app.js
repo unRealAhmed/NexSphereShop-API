@@ -12,6 +12,7 @@ const cors = require("cors");
 const hpp = require('hpp');
 const connectDatabase = require('./utils/dataBase');
 const userRouter = require('./routes/userRoutes');
+const errorController = require('./controllers/errorController');
 
 // Import controllers and utility functions
 
@@ -59,7 +60,7 @@ app.all("*", (req, _, next) => {
 });
 
 // Error Controller: Handle errors generated during request processing
-// app.use(errorController);
+app.use(errorController);
 
 // Start the server and listen on the defined port
 try {
