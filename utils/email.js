@@ -17,7 +17,7 @@ module.exports = class Email {
       from: this.from,
       to: this.to,
       subject,
-      text: message,
+      text: message || '',
       html
     };
 
@@ -34,11 +34,12 @@ module.exports = class Email {
     Happy shopping!
     The NexSphereShop Team 🌐`;
 
-    await this.send(subject, message);
+    await this.send(subject, null, message);
   }
 
-  async sendPasswordResetEmail(message, html) {
+  async sendPasswordResetEmail(html) {
     const subject = "Password Reset Request for Your NexSphereShop Account 🛡️"
+    const message = 'hi'
     await this.send(subject, message, html);
   }
 };
