@@ -8,7 +8,7 @@ module.exports = class Email {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
-    this.from = 'E-Commerce Team <ahmed@ECommerce.io>';
+    this.from = 'NexSphereShop Team <ahmed@NexSphereShop.io>';
   }
 
   // Send an email with specified subject and message
@@ -26,14 +26,19 @@ module.exports = class Email {
   }
 
   async sendWelcomeEmail() {
-    const subject = 'Welcome To E-Commerce Family 🚀';
-    const message = `Welcome, ${this.firstName}! 🎉 We're thrilled to have you as part of our E-Commerce community. Get ready to discover exciting products, exclusive offers, and a delightful shopping experience. Let's make your shopping journey a success together! 🌟`;
+    const subject = 'Welcome To NexSphereShop Family 🚀';
+    const message = `Hello ${this.firstName}! 🎉
+
+    Welcome to NexSphereShop! We're excited to have you as a valued member of our E-Commerce community. Get ready to explore a wide range of products, enjoy exclusive offers, and immerse yourself in a delightful shopping experience. Together, let's make your shopping journey with NexSphereShop a resounding success! 🌟
+    
+    Happy shopping!
+    The NexSphereShop Team 🌐`;
 
     await this.send(subject, message);
   }
 
   async sendPasswordResetEmail(message, html) {
-    const subject = "Password Reset Request for Your E-Commerce Account 🛡️"
+    const subject = "Password Reset Request for Your NexSphereShop Account 🛡️"
     await this.send(subject, message, html);
   }
 };
