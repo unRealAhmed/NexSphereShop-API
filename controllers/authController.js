@@ -1,9 +1,12 @@
-// const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
+const { promisify } = require('util')
+const crypto = require('crypto')
 const User = require('../models/userModel')
 const createToken = require('../utils/createToken')
 const AppError = require('../utils/appErrors')
 const Email = require('../utils/email')
 const asyncHandler = require('../utils/asyncHandler')
+const { resetHtmlTemplate } = require('../utils/resetPasswordTemplate')
 
 // Helper function to send JWT token as a response
 const sendTokenResponse = (res, user, statusCode) => {
