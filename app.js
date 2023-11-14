@@ -10,6 +10,7 @@ const xss = require("xss-clean");
 // const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const hpp = require('hpp');
+const connectDatabase = require('./utils/dataBase');
 
 // Import controllers and utility functions
 
@@ -45,7 +46,7 @@ app.use(express.static('./public'));
 // app.use('/api/v1/users', userRouter);
 
 // Connect to the database
-// connectDatabase();
+connectDatabase()
 
 // Error Handling Middleware: Handle requests for undefined routes
 app.all("*", (req, _, next) => {
