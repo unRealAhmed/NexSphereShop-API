@@ -8,8 +8,16 @@ module.exports = class APIFeatures {
   // Filter the query based on query parameters
   filter() {
     const queryObj = { ...this.queryString };
+
+    // Include the search functionality
+    if (queryObj.search) {
+      const priceRange = queryObj.price.split("-");
+      queryObj.price = { $gte: priceRange[0], $lte: priceRange[1] };
+      delete queryObj.search; // Remove the original search parameter
+    }
+
     // Additional filters for brand, category, color, size, and price range
-    const additionalFilters = ['name', 'brand', 'category', 'color', 'size', 'price'];
+    const additionalFilters = ['name', 'brand', 'category', 'color', 'size'];
 
     additionalFilters.forEach(filterKey => {
       if (queryObj[filterKey]) {

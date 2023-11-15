@@ -1,11 +1,15 @@
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/appErrors');
-// const resourceController = require('./resourceController');
+const { getAll, getOne } = require('./resourceController');
 const Product = require('../models/productModel');
 // const Review = require('../models/reviewModel');
 const Brand = require('../models/brandMode');
 const Category = require('../models/categoryModel');
 
+
+
+exports.getAllProducts = getAll(Product)
+exports.getSingleProduct = getOne(Product)
 
 exports.createProduct = asyncHandler(async (req, res, next) => {
   const { name, description, category, sizes, colors, price, totalQty, brand } = req.body;
@@ -56,5 +60,66 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
     status: "success",
     message: "Product created successfully",
     product,
+  });
+});
+
+exports.updateProduct = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    description,
+    category,
+    sizes,
+    colors,
+    user,
+    price,
+    totalQty,
+    brand,
+  } = req.body;
+
+  const product = await Product.findByIdAndUpdate(
+    req.params.id,
+    {
+      name,
+      description,
+      category,
+      sizes,
+      colors,
+      user,
+      price,
+      totalQty,
+      brand,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  res.json({
+    status: "success",
+    message: "Product updated successfully",
+    product,
+  });
+});
+
+exports.deleteProduct = asyncHandler(async (req, res, next) => {
+  const productId = req.params.id;
+
+  // Find the product by ID
+  const product = await Product.findById(productId);
+
+  // Check if the product exists
+  if (!product) {
+    return next(new AppError('Product not found', 404));
+  }
+
+  // Delete all reviews associated with the product
+  // await Review.deleteMany({ product: productId });
+
+  // Delete the product
+  await Product.deleteOne({ _id: productId });
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });
