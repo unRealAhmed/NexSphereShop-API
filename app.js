@@ -11,9 +11,11 @@ const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const hpp = require('hpp');
 const connectDatabase = require('./utils/dataBase');
-const userRouter = require('./routes/userRoutes');
 const errorController = require('./controllers/errorController');
-
+const userRouter = require('./routes/userRoutes');
+const productRouter = require('./routes/productRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
+const brandRouter = require('./routes/brandRoutes');
 // Import controllers and utility functions
 
 // Initialize Express app
@@ -44,9 +46,11 @@ app.use(express.json({ limit: '100kb' }));
 // Serve static files
 app.use(express.static('./public'));
 
-// Define routes for jobs and users, protecting job routes with authentication
-app.use('/api/v1/users', userRouter);
 
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/products', productRouter);
+app.use('/api/v1/category', categoryRouter);
+app.use('/api/v1/brands', brandRouter);
 // Connect to the database
 connectDatabase()
 
