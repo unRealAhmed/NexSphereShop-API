@@ -13,7 +13,7 @@ const categorySchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: [true, 'Please provide an image for the category.'],
+      // required: [true, 'Please provide an image for the category.'],
     },
     products: [
       {
