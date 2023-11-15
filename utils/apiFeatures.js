@@ -7,13 +7,15 @@ module.exports = class APIFeatures {
 
   // Filter the query based on query parameters
   filter() {
-    const queryObj = { ...this.queryString }; // Use object spread for clarity
+    const queryObj = { ...this.queryString };
+    // Additional filters for brand, category, color, size, and price range
+    const additionalFilters = ['name', 'brand', 'category', 'color', 'size', 'price'];
 
-    // Include the search functionality
-    if (queryObj.search) {
-      queryObj.name = { $regex: queryObj.search, $options: 'i' };
-      delete queryObj.search; // Remove the original search parameter
-    }
+    additionalFilters.forEach(filterKey => {
+      if (queryObj[filterKey]) {
+        queryObj[filterKey] = { $regex: queryObj[filterKey], $options: 'i' };
+      }
+    });
 
     const filteredQuery = Object.keys(queryObj)
       .filter(key => !this.excludedFields.includes(key))
@@ -27,7 +29,7 @@ module.exports = class APIFeatures {
 
     this.query = this.query.find(JSON.parse(queryStr));
 
-    return this; // Return the APIFeatures instance for method chaining
+    return this;
   }
 
   // Sort the query based on the sort parameter
