@@ -31,8 +31,17 @@ const productSchema = new mongoose.Schema(
       type: [String],
       required: [true, 'Please provide at least one color for the product.'],
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+      set: (val) => +val.toFixed(1),
+    },
+    numOfReviews: {
+      type: Number,
+      default: 0,
+    },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.ObjectId,
       required: [true, 'Please provide a user ID for the product.'],
       ref: 'User',
     },
@@ -41,12 +50,6 @@ const productSchema = new mongoose.Schema(
         type: String,
         required: [true, 'Please provide at least one image for the product.'],
         default: '/uploads/example.jpeg'
-      },
-    ],
-    reviews: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review',
       },
     ],
     price: {
@@ -66,8 +69,28 @@ const productSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
+
+// Create a virtual field for reviews associated with the product
+productSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'product',
+  localField: '_id',
+});
+
+// Pre middleware to populate user and reviews fields
+productSchema.pre(/^findOne/, function (next) {
+  this.populate({
+    path: 'user',
+    select: 'fullname',
+  }).populate({
+    path: 'reviews',
+    select: 'review rating',
+  })
+  next();
+});
 
 const Product = mongoose.model('Product', productSchema);
 
