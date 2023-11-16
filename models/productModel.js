@@ -73,6 +73,11 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+productSchema.virtual("qtyLeft").get(function () {
+  const product = this;
+  return product.totalQty - product.totalSold;
+});
+
 // Create a virtual field for reviews associated with the product
 productSchema.virtual('reviews', {
   ref: 'Review',
