@@ -8,6 +8,7 @@ const {
   createUser,
   updateUser,
   deleteUser,
+  updateShippingAddress
 } = require('../controllers/userController');
 
 const {
@@ -37,6 +38,7 @@ router.get('/me', getMe, getUser);
 router.patch('/updateMyPassword', updatePassword);
 router.patch('/updateMe', updateMe);
 router.delete('/deleteMe', deleteMe);
+router.patch('/updateShipping', updateShippingAddress);
 
 // Admin-restricted routes
 router.use(restrictTo('admin'));

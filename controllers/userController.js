@@ -45,7 +45,7 @@ exports.updateMe = asyncHandler(async (req, res, next) => {
   }
 
   // 2) Filter out any unwanted fields that should not be updated
-  const filteredBody = filterObj(req.body, 'name', 'email');
+  const filteredBody = filterObj(req.body, 'fullname', 'email');
 
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
@@ -68,5 +68,44 @@ exports.deleteMe = asyncHandler(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+exports.updateShippingAddress = asyncHandler(async (req, res, next) => {
+  const {
+    firstName,
+    lastName,
+    address,
+    city,
+    postalCode,
+    province,
+    phone,
+    country,
+  } = req.body;
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      shippingAddress: {
+        firstName,
+        lastName,
+        address,
+        city,
+        postalCode,
+        province,
+        phone,
+        country,
+      },
+      hasShippingAddress: true,
+    },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+  //send response
+  res.json({
+    status: "success",
+    message: "User shipping address updated successfully",
+    user,
   });
 });
