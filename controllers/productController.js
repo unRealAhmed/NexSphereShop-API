@@ -2,7 +2,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/appErrors');
 const { getAll, getOne } = require('./resourceController');
 const Product = require('../models/productModel');
-// const Review = require('../models/reviewModel');
+// eslint-disable-next-line no-unused-vars
+const Review = require('../models/reviewModel');
 const Brand = require('../models/brandModel');
 const Category = require('../models/categoryModel');
 
