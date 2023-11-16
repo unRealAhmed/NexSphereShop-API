@@ -60,6 +60,9 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
       new: true,
     }
   );
+  if (!category) {
+    return next(new AppError('category not found', 404));
+  }
   res.json({
     status: "success",
     message: "category updated successfully",

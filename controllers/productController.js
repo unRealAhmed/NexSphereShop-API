@@ -7,9 +7,9 @@ const Brand = require('../models/brandModel');
 const Category = require('../models/categoryModel');
 
 
-
+const productType = 'product'
 exports.getAllProducts = getAll(Product)
-exports.getSingleProduct = getOne(Product)
+exports.getSingleProduct = getOne(Product, productType)
 
 exports.createProduct = asyncHandler(async (req, res, next) => {
   const { name, description, category, sizes, colors, price, totalQty, brand } = req.body;
@@ -93,6 +93,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       runValidators: true,
     }
   );
+  if (!product) {
+    return next(new AppError('Product not found', 404));
+  }
   res.json({
     status: "success",
     message: "Product updated successfully",

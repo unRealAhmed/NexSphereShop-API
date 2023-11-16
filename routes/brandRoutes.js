@@ -4,9 +4,13 @@ const { getAllBrands, getSingleBrand, updateBrand, deleteBrand, createBrand } = 
 
 const router = express.Router()
 
+router.get('/', getAllBrands)
+router.get('/:id', getSingleBrand)
+
 router.use(protect, restrictTo('admin'))
 
-router.route('/').get(getAllBrands).post(createBrand);
-router.route('/:id').get(getSingleBrand).patch(updateBrand).delete(deleteBrand);
+router.post('/', createBrand)
+router.route('/:id').patch(updateBrand).delete(deleteBrand);
+
 
 module.exports = router

@@ -57,6 +57,10 @@ exports.updateBrand = asyncHandler(async (req, res, next) => {
       new: true,
     }
   );
+  if (!brand) {
+    return next(new AppError('brand not found', 404));
+  }
+
   res.json({
     status: "success",
     message: "brand updated successfully",

@@ -4,9 +4,12 @@ const { getAllCategories, getSingleCategory, updateCategory, deleteCategory, cre
 
 const router = express.Router()
 
+router.get('/', getAllCategories)
+router.get('/:id', getSingleCategory)
+
 router.use(protect, restrictTo('admin'))
 
-router.route('/').get(getAllCategories).post(createCategory);
-router.route('/:id').get(getSingleCategory).patch(updateCategory).delete(deleteCategory);
+router.post('/', createCategory)
+router.route('/:id').patch(updateCategory).delete(deleteCategory);
 
 module.exports = router
