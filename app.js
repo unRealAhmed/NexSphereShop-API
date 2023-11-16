@@ -16,6 +16,8 @@ const userRouter = require('./routes/userRoutes');
 const productRouter = require('./routes/productRoutes');
 const categoryRouter = require('./routes/categoryRoutes');
 const brandRouter = require('./routes/brandRoutes');
+const colorRouter = require('./routes/colorRoutes');
+
 // Import controllers and utility functions
 
 // Initialize Express app
@@ -51,6 +53,7 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/brands', brandRouter);
+app.use("/api/v1/colors", colorRouter);
 // Connect to the database
 connectDatabase()
 
