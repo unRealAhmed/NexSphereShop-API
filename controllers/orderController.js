@@ -6,12 +6,29 @@ const Order = require('../models/orderModel')
 const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const AppError = require('../utils/appErrors');
+const Coupon = require('../models/couponModel');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const endPointSecret = process.env.STRIPE_ENDPOINT_SECRET
 
 exports.createOrder = asyncHandler(async (req, res, next) => {
+
+  //get teh coupon
+  const { coupon } = req.query;
+
+  const couponFound = await Coupon.findOne({
+    code: coupon?.toUpperCase(),
+  });
+  if (couponFound?.isExpired) {
+    throw new Error("Coupon has expired");
+  }
+  if (!couponFound) {
+    throw new Error("Coupon does exists");
+  }
+
+  const discount = couponFound.discount / 100;
+
   const { orderItems, shippingAddress, totalPrice } = req.body;
   if (!orderItems || orderItems.length < 1) {
     return next(new AppError('No cart items provided', 400));
@@ -28,7 +45,7 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
     user: user._id,
     orderItems,
     shippingAddress,
-    totalPrice,
+    totalPrice: couponFound ? totalPrice - totalPrice * discount : totalPrice,
   });
 
   //Update the product qty
