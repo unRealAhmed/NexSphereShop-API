@@ -57,7 +57,7 @@ NexSphereShop API is a robust e-commerce solution built with Node.js and Express
 
 ## Prerequisites
 
-Before running the JobsHub API, ensure you have the following prerequisites installed:
+Before running the NexSphereShop API, ensure you have the following prerequisites installed:
 
 - [Node.js](https://nodejs.org/)
 - [MongoDB](https://www.mongodb.com/) (with connection details configured in a .env file)
