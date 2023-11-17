@@ -18,6 +18,7 @@ const categoryRouter = require('./routes/categoryRoutes');
 const brandRouter = require('./routes/brandRoutes');
 const colorRouter = require('./routes/colorRoutes');
 const orderRouter = require('./routes/orderRoutes');
+const couponRouter = require('./routes/couponRoutes');
 const { webhookCheckout } = require('./controllers/orderController');
 
 // Initialize Express app
@@ -55,6 +56,7 @@ app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/brands', brandRouter);
 app.use("/api/v1/colors", colorRouter);
 app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/coupons", couponRouter);
 
 // Connect to the database
 connectDatabase();
