@@ -18,20 +18,11 @@ const categoryRouter = require('./routes/categoryRoutes');
 const brandRouter = require('./routes/brandRoutes');
 const colorRouter = require('./routes/colorRoutes');
 const orderRouter = require('./routes/orderRoutes');
-
-// Import controllers and utility functions
+const { webhookCheckout } = require('./controllers/orderController');
 
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 8000;
-
-// Rate limiting middleware to prevent abuse
-const limiter = rateLimit({
-  max: 200,
-  windowMs: 60 * 60 * 1000, // 1 hour
-  message: 'Too many requests from this IP, please try again in an hour!'
-});
-app.use('/api', limiter);
 
 // Enhance security with various middleware
 app.use(helmet()); // Set various HTTP headers for security
@@ -43,12 +34,20 @@ app.use(hpp());
 app.use(cookieParser(process.env.JWT_SECRET_KEY));
 app.use(cors());
 app.options("*", cors());
-app.use(express.json());
 app.use(express.json({ limit: '100kb' }));
 
 // Serve static files
 app.use(express.static('./public'));
 
+// Stripe Webhook
+app.post("/webhook", express.raw({ type: "application/json" }), webhookCheckout);
+
+// Rate limiting middleware to prevent abuse
+app.use('/api', rateLimit({
+  max: 200,
+  windowMs: 60 * 60 * 1000, // 1 hour
+  message: 'Too many requests from this IP, please try again in an hour!'
+}));
 
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
@@ -56,8 +55,9 @@ app.use('/api/v1/category', categoryRouter);
 app.use('/api/v1/brands', brandRouter);
 app.use("/api/v1/colors", colorRouter);
 app.use("/api/v1/orders", orderRouter);
+
 // Connect to the database
-connectDatabase()
+connectDatabase();
 
 // Error Handling Middleware: Handle requests for undefined routes
 app.all("*", (req, _, next) => {
@@ -72,10 +72,6 @@ app.all("*", (req, _, next) => {
 app.use(errorController);
 
 // Start the server and listen on the defined port
-try {
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
-} catch (error) {
-  console.error('An error occurred while starting the server:', error);
-}
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

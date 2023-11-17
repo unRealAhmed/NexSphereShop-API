@@ -1,13 +1,15 @@
+/* eslint-disable no-shadow */
 require("dotenv").config({ path: '../config.env' });
-// const { Stripe } = require('stripe')
+const { Stripe } = require('stripe')
 const asyncHandler = require('../utils/asyncHandler')
 const Order = require('../models/orderModel')
 const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const AppError = require('../utils/appErrors');
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-// const stripe = new Stripe()
+const endPointSecret = process.env.STRIPE_ENDPOINT_SECRET
 
 exports.createOrder = asyncHandler(async (req, res, next) => {
   const { orderItems, shippingAddress, totalPrice } = req.body;
@@ -31,9 +33,7 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
 
   //Update the product qty
   const products = await Product.find({ _id: { $in: orderItems } });
-  // eslint-disable-next-line no-shadow
   orderItems.map(async (order) => {
-    // eslint-disable-next-line no-shadow
     const product = products?.find((product) => product?._id?.toString() === order?._id?.toString());
     if (product) {
       product.totalSold += order.qty;
@@ -45,10 +45,28 @@ exports.createOrder = asyncHandler(async (req, res, next) => {
   user.orders.push(order._id);
   await user.save({ validateBeforeSave: false });
 
-  res.status(201).json({
-    status: "success",
-    order
-  })
+  //convert order items to have same structure that stripe need
+  const convertedOrders = orderItems.map((item) => ({
+    price_data: {
+      currency: "usd",
+      product_data: {
+        name: item?.name,
+        description: item?.description,
+      },
+      unit_amount: item.price * 100,
+    },
+    quantity: item?.qty,
+  }));
+  const session = await stripe.checkout.sessions.create({
+    line_items: convertedOrders,
+    metadata: {
+      orderId: JSON.stringify(order?._id),
+    },
+    mode: "payment",
+    success_url: "http://localhost:8000/success",
+    cancel_url: "http://localhost:8000/cancel",
+  });
+  res.send({ url: session.url });
 
 })
 
@@ -93,3 +111,44 @@ exports.updateOrder = asyncHandler(async (req, res) => {
     updatedOrder,
   });
 });
+
+exports.webhookCheckout = async (request, response) => {
+  const sig = request.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endPointSecret);
+    console.log("event");
+  } catch (err) {
+    console.log("err", err.message);
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+  if (event.type === "checkout.session.completed") {
+    //update the order
+    const session = event.data.object;
+    const { orderId } = session.metadata;
+    const paymentStatus = session.payment_status;
+    const paymentMethod = session.payment_method_types[0];
+    const totalAmount = session.amount_total;
+    const { currency } = session
+    //find the order
+    const order = await Order.findByIdAndUpdate(
+      JSON.parse(orderId),
+      {
+        totalPrice: totalAmount / 100,
+        currency,
+        paymentMethod,
+        paymentStatus,
+      },
+      {
+        new: true,
+      }
+    );
+    console.log(order);
+  } else {
+    return;
+  }
+  response.send();
+}
