@@ -22,29 +22,37 @@ const {
   updatePassword,
 } = require('../controllers/authController');
 
+const {
+  userValidationSchema,
+  updatePasswordSchema,
+  updateProfileSchema,
+  shippingAddressSchema,
+} = require('../validation/userValidation');
+
+const validationMiddleware = require('../middleware/validationFunction');
+
 const router = express.Router();
+
 // Authentication routes
-router.post('/signup', signup);
+router.post('/signup', validationMiddleware(userValidationSchema), signup);
 router.post('/login', login);
 router.get('/logout', logout);
 router.post('/forgotPassword', forgetPassword);
 router.patch('/resetPassword/:token', resetPassword);
 
-// Protect all routes after this middleware
 router.use(protect);
 
 // User routes
 router.get('/me', getMe, getUser);
-router.patch('/updateMyPassword', updatePassword);
-router.patch('/updateMe', updateMe);
+router.patch('/updateMyPassword', validationMiddleware(updatePasswordSchema), updatePassword);
+router.patch('/updateMe', validationMiddleware(updateProfileSchema), updateMe);
+router.patch('/updateShipping', validationMiddleware(shippingAddressSchema), updateShippingAddress);
 router.delete('/deleteMe', deleteMe);
-router.patch('/updateShipping', updateShippingAddress);
 
 // Admin-restricted routes
 router.use(restrictTo('admin'));
 
-// User management routes
-router.route('/').get(getAllUsers).post(createUser);
+router.route('/').get(getAllUsers).post(validationMiddleware(userValidationSchema), createUser);
 router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 module.exports = router;

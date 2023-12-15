@@ -1,13 +1,22 @@
-const express = require('express')
-const { protect } = require('../controllers/authController')
-const { getAllorders, getSingleOrder, createOrder, updateOrder, getOrderStats } = require('../controllers/orderController')
+const express = require('express');
+const { protect } = require('../controllers/authController');
+const { getAllorders, getSingleOrder, createOrder, updateOrder, getOrderStats }
+  = require('../controllers/orderController');
+const validationMiddleware = require('../middleware/validationFunction');
 
-const router = express.Router()
+const {
+  orderValidationSchema,
+} = require('../validation/orderValidation');
 
-router.use(protect)
-router.get("/sales/stats", getOrderStats);
-router.route('/').post(createOrder).get(getAllorders)
-router.route('/:id').get(getSingleOrder).patch(updateOrder)
+const router = express.Router();
 
-module.exports = router
+router.use(protect);
+router.get('/sales/stats', getOrderStats);
 
+router.post('/', validationMiddleware(orderValidationSchema), createOrder);
+
+router.route('/:id').get(getSingleOrder).patch(validationMiddleware(orderValidationSchema), updateOrder);
+
+router.route('/').get(getAllorders);
+
+module.exports = router;

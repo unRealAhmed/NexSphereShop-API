@@ -1,16 +1,25 @@
-const express = require('express')
-const { protect, restrictTo } = require('../controllers/authController')
-const { getAllCategories, getSingleCategory, updateCategory, deleteCategory, createCategory } = require('../controllers/categoryController')
+const express = require('express');
+const { protect, restrictTo } = require('../controllers/authController');
+const { getAllCategories, getSingleCategory, updateCategory, deleteCategory, createCategory } = require('../controllers/categoryController');
 const upload = require('../utils/fileUpload');
+const validationMiddleware = require('../middleware/validationFunction');
 
-const router = express.Router()
+const {
+  categoryValidationSchema,
+} = require('../validation/categoryValidation');
 
-router.get('/', getAllCategories)
-router.get('/:id', getSingleCategory)
+const router = express.Router();
 
-router.use(protect, restrictTo('admin'))
+router.get('/', getAllCategories);
+router.get('/:id', getSingleCategory);
 
-router.post('/', upload.single('image'), createCategory)
-router.route('/:id').patch(updateCategory).delete(deleteCategory);
+router.use(protect, restrictTo('admin'));
 
-module.exports = router
+router.post('/', validationMiddleware(categoryValidationSchema), upload.single('image'), createCategory);
+
+router
+  .route('/:id')
+  .patch(validationMiddleware(categoryValidationSchema), updateCategory)
+  .delete(deleteCategory);
+
+module.exports = router;

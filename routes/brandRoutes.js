@@ -1,16 +1,21 @@
-const express = require('express')
-const { protect, restrictTo } = require('../controllers/authController')
-const { getAllBrands, getSingleBrand, updateBrand, deleteBrand, createBrand } = require('../controllers/brandController')
+const express = require('express');
+const { protect, restrictTo } = require('../controllers/authController');
+const { getAllBrands, getSingleBrand, updateBrand, deleteBrand, createBrand } = require('../controllers/brandController');
+const validationMiddleware = require('../middleware/validationFunction');
 
-const router = express.Router()
+const {
+  brandValidationSchema,
+} = require('../validation/brandValidation');
 
-router.get('/', getAllBrands)
-router.get('/:id', getSingleBrand)
+const router = express.Router();
 
-router.use(protect, restrictTo('admin'))
+router.get('/', getAllBrands);
+router.get('/:id', getSingleBrand);
 
-router.post('/', createBrand)
+router.use(protect, restrictTo('admin'));
+
+router.post('/', validationMiddleware(brandValidationSchema), createBrand);
+
 router.route('/:id').patch(updateBrand).delete(deleteBrand);
 
-
-module.exports = router
+module.exports = router;

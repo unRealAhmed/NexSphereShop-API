@@ -1,15 +1,21 @@
-const express = require('express')
-const { protect, restrictTo } = require('../controllers/authController')
-const { getAllColors, getSingleColor, updateColor, deleteColor, createColor } = require('../controllers/colorController')
+const express = require('express');
+const { protect, restrictTo } = require('../controllers/authController');
+const { getAllColors, getSingleColor, updateColor, deleteColor, createColor } = require('../controllers/colorController');
+const validationMiddleware = require('../middleware/validationFunction');
 
-const router = express.Router()
+const {
+  colorValidationSchema,
+} = require('../validation/colorValidation');
 
-router.get('/', getAllColors)
-router.get('/:id', getSingleColor)
+const router = express.Router();
 
-router.use(protect, restrictTo('admin'))
+router.get('/', getAllColors);
+router.get('/:id', getSingleColor);
 
-router.post('/', createColor)
-router.route('/:id').patch(updateColor).delete(deleteColor);
+router.use(protect, restrictTo('admin'));
 
-module.exports = router
+router.post('/', validationMiddleware(colorValidationSchema), createColor);
+
+router.route('/:id').patch(validationMiddleware(colorValidationSchema), updateColor).delete(deleteColor);
+
+module.exports = router;
