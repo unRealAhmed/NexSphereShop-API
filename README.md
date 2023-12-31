@@ -4,6 +4,8 @@ NexSphereShop API is a robust e-commerce solution built with Node.js and Express
 
 ## Table of Contents
 
+[![Contributors](https://img.shields.io/github/contributors/username/repo.svg)](https://github.com/username/repo/graphs/contributors)
+
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
