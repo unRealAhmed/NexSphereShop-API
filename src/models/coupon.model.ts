@@ -9,6 +9,8 @@ export interface ICoupon extends AbstractDocument {
     endDate: Date
     discount: number
     createdBy: ID
+    isActive: boolean
+    redemptionCount: number
 }
 
 const couponSchema = new Schema<ICoupon>(
@@ -33,6 +35,14 @@ const couponSchema = new Schema<ICoupon>(
             type: Schema.Types.ObjectId,
             ref: User.name,
             required: true,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
+        redemptionCount: {
+            type: Number,
+            default: 0,
         },
     },
     {
