@@ -239,7 +239,7 @@ components:
             properties:
                 name:
                     type: string
-                    example: 'Updated Red'
+                    example: 'Green'
                 hexCode:
                     type: string
                     example: '#D50000'
