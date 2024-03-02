@@ -22,7 +22,6 @@ const hexCodeSchema = z
 const createColorSchema = z.object({
     name: nameSchema,
     hexCode: hexCodeSchema,
-    createdBy: IDSchema,
 })
 
 const updateColorSchema = z.object({
