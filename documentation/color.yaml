@@ -1,0 +1,258 @@
+openapi: 3.0.0
+info:
+    title: Color API
+    description: API for color management (CRUD operations)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Colors
+      description: Endpoints related to color management
+
+paths:
+    /api/colors:
+        post:
+            tags:
+                - Colors
+            summary: Create a new color
+            requestBody:
+                description: Color creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ColorCreate'
+            responses:
+                201:
+                    description: Color successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ColorResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid color data
+            examples:
+                application/json:
+                    value:
+                        name: 'Red'
+                        hexCode: '#FF0000'
+
+        get:
+            tags:
+                - Colors
+            summary: Get all colors
+            responses:
+                200:
+                    description: List of colors retrieved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/ColorResponse'
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        data:
+                            - id: '1'
+                              name: 'Red'
+                              hexCode: '#FF0000'
+                            - id: '2'
+                              name: 'Green'
+                              hexCode: '#00FF00'
+
+    /api/colors/{colorId}:
+        get:
+            tags:
+                - Colors
+            summary: Get a color by ID
+            parameters:
+                - in: path
+                  name: colorId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the color to retrieve
+            responses:
+                200:
+                    description: Color found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ColorResponse'
+                404:
+                    description: Color not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Color not found
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        data:
+                            id: '1'
+                            name: 'Red'
+                            hexCode: '#FF0000'
+
+        patch:
+            tags:
+                - Colors
+            summary: Update a color's details
+            parameters:
+                - in: path
+                  name: colorId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the color to update
+            requestBody:
+                description: Data to update color details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ColorUpdate'
+            responses:
+                200:
+                    description: Color successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ColorResponse'
+                404:
+                    description: Color not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Color not found
+            examples:
+                application/json:
+                    value:
+                        name: 'Updated Red'
+                        hexCode: '#D50000'
+
+        delete:
+            tags:
+                - Colors
+            summary: Delete a color by ID
+            parameters:
+                - in: path
+                  name: colorId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the color to delete
+            responses:
+                204:
+                    description: Color successfully deleted
+                404:
+                    description: Color not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Color not found
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        message: 'Color successfully deleted.'
+
+components:
+    schemas:
+        ColorCreate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: 'Red'
+                    description: Name of the color
+                hexCode:
+                    type: string
+                    example: '#FF0000'
+                    description: Hexadecimal code of the color
+            required:
+                - name
+                - hexCode
+
+        ColorUpdate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: 'Updated Red'
+                hexCode:
+                    type: string
+                    example: '#D50000'
+
+        ColorResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: '1'
+                name:
+                    type: string
+                    example: 'Red'
+                hexCode:
+                    type: string
+                    example: '#FF0000'
