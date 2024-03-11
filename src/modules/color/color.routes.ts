@@ -1,21 +1,52 @@
-// import { protect, restrictTo } from '@modules/user/auth.Controller'
-// import express from 'express'
-// import {
-//     createColor,
-//     // deleteColor,
-//     // getAllColors,
-//     getSingleColor,
-// } from './color.Controller'
+import express from 'express'
+import { extractUserFromToken } from '../../middlewares/auth'
+import { validate } from '../../middlewares/validation.middleware'
+import { createRoute } from '../../shared/helpers/routeHelper'
+import { colorSchemas } from '../../validations'
+import { ColorController } from './color.controller'
 
-// const router = express.Router()
+const router = express.Router()
+const colorController = new ColorController()
 
-// // router.get('/', getAllColors)
-// router.get('/:id', getSingleColor)
+createRoute(
+    router,
+    'post',
+    '/',
+    extractUserFromToken,
+    validate(colorSchemas.createColor),
+    colorController.createColor.bind(colorController),
+)
 
-// router.use(protect, restrictTo('admin'))
+createRoute(
+    router,
+    'get',
+    '/',
+    colorController.getAllColors.bind(colorController),
+)
 
-// router.post('/', createColor)
+createRoute(
+    router,
+    'get',
+    '/:id',
+    validate(colorSchemas.findColorById),
+    colorController.getColor.bind(colorController),
+)
 
-// // router.route('/:id').patch(updateColor).delete(deleteColor)
+createRoute(
+    router,
+    'patch',
+    '/:id',
+    extractUserFromToken,
+    validate(colorSchemas.updateColor),
+    colorController.updateColor.bind(colorController),
+)
 
-// export default router
+createRoute(
+    router,
+    'delete',
+    '/:id',
+    extractUserFromToken,
+    colorController.deleteColor.bind(colorController),
+)
+
+export default router
