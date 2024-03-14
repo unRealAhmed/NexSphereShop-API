@@ -3,6 +3,7 @@ export const ErrorMessages = {
     BRAND_NOT_FOUND: 'Brand not found',
     CATEGORY_NOT_FOUND: 'Category not found',
     PRODUCT_NOT_FOUND: 'Product not found',
+    COLOR_NOT_FOUND: 'color not found',
 
     // User related errors
     EMAIL_ALREADY_IN_USE: 'Email is already in use',
