@@ -172,11 +172,11 @@ components:
             properties:
                 name:
                     type: string
-                    example: Apple
+                    example: Nike
                     description: Name of the brand
                 image:
                     type: string
-                    example: https://example.com/images/apple.png
+                    example: https://example.com/images/Nike.png
                     description: URL of the brand's image
 
         BrandUpdate:
@@ -184,10 +184,10 @@ components:
             properties:
                 name:
                     type: string
-                    example: Updated Apple
+                    example: Updated Nike
                 image:
                     type: string
-                    example: https://example.com/images/updated-apple.png
+                    example: https://example.com/images/updated-Nike.png
 
         BrandResponse:
             type: object
@@ -197,10 +197,10 @@ components:
                     example: 1
                 name:
                     type: string
-                    example: Apple
+                    example: Nike
                 image:
                     type: string
-                    example: https://example.com/images/apple.png
+                    example: https://example.com/images/Nike.png
                 createdBy:
                     type: string
                     example: 60b8c1f47e10e81234567890
