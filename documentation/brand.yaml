@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+    title: Brand API
+    description: API for brand management (CRUD operations)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Brands
+      description: Endpoints related to brand management
+
+paths:
+    /api/brands:
+        post:
+            tags:
+                - Brands
+            summary: Create a new brand
+            requestBody:
+                description: Brand creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BrandCreate'
+            responses:
+                201:
+                    description: Brand successfully created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BrandResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid brand data
+
+        get:
+            tags:
+                - Brands
+            summary: Get all brands
+            responses:
+                200:
+                    description: List of brands retrieved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/BrandResponse'
+
+    /api/brands/{brandId}:
+        get:
+            tags:
+                - Brands
+            summary: Get a brand by ID
+            parameters:
+                - in: path
+                  name: brandId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the brand to retrieve
+            responses:
+                200:
+                    description: Brand found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BrandResponse'
+                404:
+                    description: Brand not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Brand not found
+
+        patch:
+            tags:
+                - Brands
+            summary: Update a brand's details
+            parameters:
+                - in: path
+                  name: brandId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the brand to update
+            requestBody:
+                description: Data to update brand details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BrandUpdate'
+            responses:
+                200:
+                    description: Brand successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BrandResponse'
+                404:
+                    description: Brand not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Brand not found
+
+        delete:
+            tags:
+                - Brands
+            summary: Delete a brand by ID
+            parameters:
+                - in: path
+                  name: brandId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the brand to delete
+            responses:
+                204:
+                    description: Brand successfully deleted
+                404:
+                    description: Brand not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Brand not found
+
+components:
+    schemas:
+        BrandCreate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Apple
+                    description: Name of the brand
+                image:
+                    type: string
+                    example: https://example.com/images/apple.png
+                    description: URL of the brand's image
+
+        BrandUpdate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Updated Apple
+                image:
+                    type: string
+                    example: https://example.com/images/updated-apple.png
+
+        BrandResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 1
+                name:
+                    type: string
+                    example: Apple
+                image:
+                    type: string
+                    example: https://example.com/images/apple.png
+                createdBy:
+                    type: string
+                    example: 60b8c1f47e10e81234567890
+                deleted:
+                    type: boolean
+                    example: false
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: '2024-01-01T00:00:00Z'
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: '2024-01-01T00:00:00Z'
