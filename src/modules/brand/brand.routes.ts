@@ -1,21 +1,52 @@
-// import { protect, restrictTo } from '@modules/user/auth.Controller'
-// import express from 'express'
-// import {
-//     createBrand,
-//     // deleteBrand,
-//     // getAllBrands,
-//     getSingleBrand,
-// } from './brand.controller'
+import express from 'express'
+import { extractUserFromToken } from '../../middlewares/auth'
+import { validate } from '../../middlewares/validation.middleware'
+import { createRoute } from '../../shared/helpers/routeHelper'
+import { brandSchemas } from '../../validations'
+import { BrandController } from './brand.controller'
 
-// const router = express.Router()
+const router = express.Router()
+const brandController = new BrandController()
 
-// // router.get('/', getAllBrands)
-// router.get('/:id', getSingleBrand)
+createRoute(
+    router,
+    'post',
+    '/',
+    extractUserFromToken,
+    validate(brandSchemas.createBrand),
+    brandController.createBrand.bind(brandController),
+)
 
-// router.use(protect, restrictTo('admin'))
+createRoute(
+    router,
+    'get',
+    '/',
+    brandController.getAllBrands.bind(brandController),
+)
 
-// router.post('/', createBrand)
+createRoute(
+    router,
+    'get',
+    '/:id',
+    validate(brandSchemas.findBrandById),
+    brandController.getBrand.bind(brandController),
+)
 
-// // router.route('/:id').patch(updateBrand).delete(deleteBrand)
+createRoute(
+    router,
+    'patch',
+    '/:id',
+    extractUserFromToken,
+    validate(brandSchemas.updateBrand),
+    brandController.updateBrand.bind(brandController),
+)
 
-// export default router
+createRoute(
+    router,
+    'delete',
+    '/:id',
+    extractUserFromToken,
+    brandController.deleteBrand.bind(brandController),
+)
+
+export default router
