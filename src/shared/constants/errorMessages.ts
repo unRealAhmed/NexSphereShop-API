@@ -23,4 +23,7 @@ export const ErrorMessages = {
 
     // Category related errors
     CATEGORY_ALREADY_EXISTS: 'Category already exists',
+
+    // Brand related errors
+    BRAND_ALREADY_EXISTS: 'Brand already exists',
 }
