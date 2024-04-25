@@ -1,68 +1,68 @@
-// import Brand from '@models/brand.model'
-// // import { deleteOne, getAll } from 'resourceController.ts'
-// import AppError from '@utils/appErrors'
-// import asyncHandler from '@utils/asyncHandler'
+import { NextFunction, Request, Response } from 'express'
+import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
+import { BrandService } from './brand.service'
 
-// // export const getAllBrands = getAll(Brand)
-// // export const deleteBrand = deleteOne(Brand)
+export class BrandController {
+    private brandService: BrandService
 
-// export const createBrand = asyncHandler(async (req, res) => {
-//     const { name } = req.body
-//     //brand exists
-//     const brandFound = await Brand.findOne({ name })
-//     if (brandFound) {
-//         throw new Error('Brand already exists')
-//     }
-//     //create
-//     const brand = await Brand.create({
-//         name: name.toLowerCase(),
-//         user: req.user.id,
-//     })
+    constructor() {
+        this.brandService = new BrandService()
+    }
 
-//     res.json({
-//         status: 'success',
-//         message: 'Brand created successfully',
-//         brand,
-//     })
-// })
+    async createBrand(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId
 
-// export const getSingleBrand = asyncHandler(async (req, res, next) => {
-//     const { name } = req.query
+            const brand = await this.brandService.createBrand(req.body, userId!)
+            return res.status(201).json(brand)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     const brand = await Brand.findOne({ name })
+    async getAllBrands(req: Request, res: Response, next: NextFunction) {
+        try {
+            const brands = await this.brandService.getAllBrands()
+            return res.status(200).json(brands)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     if (!brand) {
-//         return next(new AppError('There is no brand with this name', 400))
-//     }
-//     res.json({
-//         status: 'success',
-//         message: 'Brand fetched successfully',
-//         brand,
-//     })
-// })
+    async getBrand(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params
+            const brand = await this.brandService.getBrand(
+                convertToObjectId(id),
+            )
 
-// export const updateBrand = asyncHandler(async (req, res, next) => {
-//     const { name } = req.body
-//     if (!name) {
-//         return next(new AppError('please provide a name', 400))
-//     }
-//     //update
-//     const brand = await Brand.findByIdAndUpdate(
-//         req.params.id,
-//         {
-//             name,
-//         },
-//         {
-//             new: true,
-//         },
-//     )
-//     if (!brand) {
-//         return next(new AppError('brand not found', 404))
-//     }
+            return res.status(200).json(brand)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     res.json({
-//         status: 'success',
-//         message: 'brand updated successfully',
-//         brand,
-//     })
-// })
+    async updateBrand(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id
+
+            const updatedBrand = await this.brandService.updateBrand(
+                convertToObjectId(id),
+                req.body,
+            )
+            return res.status(200).json(updatedBrand)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async deleteBrand(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id
+            await this.brandService.deleteBrand(convertToObjectId(id))
+            return res.status(204).send()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
