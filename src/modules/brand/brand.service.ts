@@ -1,39 +1,56 @@
 import { IBrand } from '../../models'
 import { BrandRepository } from '../../repositories'
-import { ConflictError } from '../../shared/errors/errors'
+import { ErrorMessages } from '../../shared/constants/errorMessages'
+import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
+import { CreateBrandDTO, UpdateBrandDTO } from './brand.dtos'
 
 export class BrandService {
     private readonly brandRepository: BrandRepository
+
     constructor() {
         this.brandRepository = new BrandRepository()
     }
 
-    async createBrand(name: string, userId: ID): Promise<IBrand> {
-        const brandExists = await this.brandRepository.exists({ name })
-        if (brandExists) {
-            throw new ConflictError('Brand already exists')
-        }
-        // Create the brand
-        return this.brandRepository.create({
-            name: name.toLowerCase(),
-            user: userId,
+    async createBrand(data: CreateBrandDTO, userId: ID): Promise<IBrand> {
+        const existingBrand = await this.brandRepository.findOne({
+            name: data.name,
         })
-    }
+        if (existingBrand) {
+            throw new BadRequestError(ErrorMessages.BRAND_ALREADY_EXISTS)
+        }
 
-    async getBrandByName(name: string): Promise<IBrand> {
-        return this.brandRepository.findOne({ name })
-    }
-
-    async updateBrand(id: ID, name: string): Promise<IBrand> {
-        return this.brandRepository.updateById(id, { name })
+        return this.brandRepository.create({ ...data, createdBy: userId })
     }
 
     async getAllBrands(): Promise<IBrand[]> {
-        return this.brandRepository.findAll()
+        return this.brandRepository.findAll({})
     }
 
-    async deleteBrand(id: ID): Promise<IBrand> {
-        return await this.brandRepository.deleteById(id)
+    async getBrand(brandId: ID): Promise<IBrand> {
+        const brand = await this.brandRepository.findById(brandId)
+        if (!brand) {
+            throw new NotFoundError(ErrorMessages.BRAND_NOT_FOUND)
+        }
+
+        return brand
+    }
+
+    async updateBrand(brandId: ID, data: UpdateBrandDTO): Promise<IBrand> {
+        const brandExist = await this.brandRepository.findById(brandId)
+        if (!brandExist) {
+            throw new NotFoundError(ErrorMessages.BRAND_NOT_FOUND)
+        }
+
+        return this.brandRepository.updateById(brandId, data)
+    }
+
+    async deleteBrand(brandId: ID): Promise<void> {
+        const brand = await this.brandRepository.findById(brandId)
+        if (!brand) {
+            throw new NotFoundError(ErrorMessages.BRAND_NOT_FOUND)
+        }
+
+        await this.brandRepository.softDelete(brandId)
     }
 }
