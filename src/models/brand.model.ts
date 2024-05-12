@@ -7,6 +7,7 @@ export interface IBrand extends AbstractDocument {
     name: string
     createdBy: ID
     image?: string
+    deleted: boolean
 }
 
 const brandSchema = new mongoose.Schema<IBrand>(
@@ -24,6 +25,10 @@ const brandSchema = new mongoose.Schema<IBrand>(
         image: {
             type: String,
             required: false, // for now
+        },
+        deleted: {
+            type: Boolean,
+            default: false,
         },
     },
     { timestamps: true },
