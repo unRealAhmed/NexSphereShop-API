@@ -6,7 +6,7 @@ import User from './user.model'
 export interface IBrand extends AbstractDocument {
     name: string
     createdBy: ID
-    products?: ID[]
+    image?: string
 }
 
 const brandSchema = new mongoose.Schema<IBrand>(
@@ -14,18 +14,17 @@ const brandSchema = new mongoose.Schema<IBrand>(
         name: {
             type: String,
             required: true,
+            unique: true,
         },
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: User.name,
             required: true,
         },
-        products: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Product',
-            },
-        ],
+        image: {
+            type: String,
+            required: false, // for now
+        },
     },
     { timestamps: true },
 )
