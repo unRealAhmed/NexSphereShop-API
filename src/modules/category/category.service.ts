@@ -12,7 +12,10 @@ export class CategoryService {
         this.categoryRepository = new CategoryRepository()
     }
 
-    async createCategory(data: CreateCategoryDTO): Promise<ICategory> {
+    async createCategory(
+        data: CreateCategoryDTO,
+        userId: ID,
+    ): Promise<ICategory> {
         const existingCategory = await this.categoryRepository.findOne({
             name: data.name,
         })
@@ -20,7 +23,7 @@ export class CategoryService {
             throw new BadRequestError(ErrorMessages.CATEGORY_ALREADY_EXISTS)
         }
 
-        return this.categoryRepository.create(data)
+        return this.categoryRepository.create({ ...data, createdBy: userId })
     }
 
     async getAllCategories(): Promise<ICategory[]> {
@@ -54,6 +57,6 @@ export class CategoryService {
             throw new NotFoundError(ErrorMessages.CATEGORY_NOT_FOUND)
         }
 
-        await this.categoryRepository.softDeleteById(categoryId)
+        await this.categoryRepository.softDelete(categoryId)
     }
 }
