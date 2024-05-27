@@ -7,6 +7,7 @@ export interface ICategory extends AbstractDocument {
     name: string
     createdBy: ID
     image?: string
+    deleted: boolean
 }
 
 const categorySchema = new Schema<ICategory>(
@@ -24,6 +25,10 @@ const categorySchema = new Schema<ICategory>(
         image: {
             type: String,
             // required: false, // Removed the required validation
+        },
+        deleted: {
+            type: Boolean,
+            default: false,
         },
     },
     { timestamps: true },
