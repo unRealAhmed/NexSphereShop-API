@@ -13,7 +13,10 @@ export class CategoryController {
         try {
             const userId = req.user?.userId
 
-            const category = await this.categoryService.createCategory(req.body , userId!)
+            const category = await this.categoryService.createCategory(
+                req.body,
+                userId!,
+            )
             return res.status(201).json(category)
         } catch (error) {
             next(error)
@@ -45,6 +48,7 @@ export class CategoryController {
     async updateCategory(req: Request, res: Response, next: NextFunction) {
         try {
             const id = req.params.id
+
             const updatedCategory = await this.categoryService.updateCategory(
                 convertToObjectId(id),
                 req.body,
