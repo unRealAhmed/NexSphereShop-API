@@ -1,0 +1,203 @@
+openapi: 3.0.0
+info:
+    title: Category API
+    description: API for category management (CRUD operations)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Categories
+      description: Endpoints related to category management
+
+paths:
+    /api/categories:
+        post:
+            tags:
+                - Categories
+            summary: Create a new category
+            requestBody:
+                description: Category creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CategoryCreate'
+            responses:
+                201:
+                    description: Category successfully created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CategoryResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid category data
+
+        get:
+            tags:
+                - Categories
+            summary: Get all categories
+            responses:
+                200:
+                    description: List of categories retrieved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/CategoryResponse'
+
+    /api/categories/{categoryId}:
+        get:
+            tags:
+                - Categories
+            summary: Get a category by ID
+            parameters:
+                - in: path
+                  name: categoryId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the category to retrieve
+            responses:
+                200:
+                    description: Category found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CategoryResponse'
+                404:
+                    description: Category not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Category not found
+
+        patch:
+            tags:
+                - Categories
+            summary: Update a category's details
+            parameters:
+                - in: path
+                  name: categoryId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the category to update
+            requestBody:
+                description: Data to update category details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CategoryUpdate'
+            responses:
+                200:
+                    description: Category successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CategoryResponse'
+                404:
+                    description: Category not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Category not found
+
+        delete:
+            tags:
+                - Categories
+            summary: Delete a category by ID
+            parameters:
+                - in: path
+                  name: categoryId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the category to delete
+            responses:
+                204:
+                    description: Category successfully deleted
+                404:
+                    description: Category not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Category not found
+
+components:
+    schemas:
+        CategoryCreate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Electronics
+                    description: Name of the category
+                description:
+                    type: string
+                    example: All electronic items
+                    description: Description of the category
+
+        CategoryUpdate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Updated Electronics
+                description:
+                    type: string
+                    example: Updated description of the category.
+
+        CategoryResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 1
+                name:
+                    type: string
+                    example: Electronics
+                description:
+                    type: string
+                    example: All electronic items
