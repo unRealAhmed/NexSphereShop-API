@@ -1,21 +1,52 @@
-// import { protect, restrictTo } from '@modules/user/auth.Controller'
-// import express from 'express'
-// import {
-//     createCategory,
-//     // deleteCategory,
-//     // getAllCategories,
-//     getSingleCategory,
-// } from './category.controller'
+import express from 'express'
+import { extractUserFromToken } from '../../middlewares/auth'
+import { validate } from '../../middlewares/validation.middleware'
+import { createRoute } from '../../shared/helpers/routeHelper'
+import { categorySchemas } from '../../validations'
+import { CategoryController } from './category.controller'
 
-// const router = express.Router()
+const router = express.Router()
+const categoryController = new CategoryController()
 
-// // router.get('/', getAllCategories)
-// router.get('/:id', getSingleCategory)
+createRoute(
+    router,
+    'post',
+    '/',
+    extractUserFromToken,
+    validate(categorySchemas.createCategory),
+    categoryController.createCategory.bind(categoryController),
+)
 
-// router.use(protect, restrictTo('admin'))
+createRoute(
+    router,
+    'get',
+    '/',
+    categoryController.getAllCategories.bind(categoryController),
+)
 
-// router.post('/', createCategory)
+createRoute(
+    router,
+    'get',
+    '/:id',
+    validate(categorySchemas.findCategoryById),
+    categoryController.getCategory.bind(categoryController),
+)
 
-// // router.route('/:id').patch(updateCategory).delete(deleteCategory)
+createRoute(
+    router,
+    'patch',
+    '/:id',
+    extractUserFromToken,
+    validate(categorySchemas.updateCategory),
+    categoryController.updateCategory.bind(categoryController),
+)
 
-// export default router
+createRoute(
+    router,
+    'delete',
+    '/:id',
+    extractUserFromToken,
+    categoryController.deleteCategory.bind(categoryController),
+)
+
+export default router
