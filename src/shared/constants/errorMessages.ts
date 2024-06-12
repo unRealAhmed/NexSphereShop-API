@@ -1,5 +1,5 @@
 export const ErrorMessages = {
-    // Product related errors
+    // Not Found errors
     BRAND_NOT_FOUND: 'Brand not found',
     CATEGORY_NOT_FOUND: 'Category not found',
     PRODUCT_NOT_FOUND: 'Product not found',
@@ -20,4 +20,7 @@ export const ErrorMessages = {
     LOGOUT_SUCCESS: 'Successfully logged out',
     REFRESH_TOKEN_MISSING: 'Refresh token missing',
     PASSWORD_RESET_TOKEN_SENT: 'Password reset token sent to email',
+
+    // Category related errors
+    CATEGORY_ALREADY_EXISTS: 'Category already exists',
 }
