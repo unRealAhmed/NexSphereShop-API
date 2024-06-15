@@ -1,70 +1,66 @@
-// import AppError from '@shared/utils/appErrors'
-// import asyncHandler from '@shared/utils/asyncHandler'
-// // import { deleteOne, getAll } from 'resourceController.ts'
-// import Category from '@models/category.model'
+import { NextFunction, Request, Response } from 'express'
+import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
+import { CategoryService } from './category.service'
 
-// // export const getAllCategories = getAll(Category)
-// // export const deleteCategory = deleteOne(Category)
+export class CategoryController {
+    private categoryService: CategoryService
 
-// export const getSingleCategory = asyncHandler(async (req, res, next) => {
-//     const { name } = req.query
+    constructor() {
+        this.categoryService = new CategoryService()
+    }
 
-//     const category = await Category.findOne({ name })
-//     if (!category) {
-//         return next(new AppError('There is no category with this name', 400))
-//     }
-//     res.json({
-//         status: 'success',
-//         message: 'Category fetched successfully',
-//         category,
-//     })
-// })
+    async createCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const category = await this.categoryService.createCategory(req.body)
+            return res.status(201).json(category)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-// export const createCategory = asyncHandler(async (req, res, next) => {
-//     const { name } = req.body
-//     if (!name) {
-//         return next(new AppError('please provide a name', 400))
-//     }
-//     //category exists
-//     const categoryFound = await Category.findOne({ name })
-//     if (categoryFound) {
-//         throw new Error('Category already exists')
-//     }
-//     //create
-//     const category = await Category.create({
-//         name: name.toLowerCase(),
-//         user: req.user.id,
-//         image: req.file.path,
-//     })
+    async getAllCategories(req: Request, res: Response, next: NextFunction) {
+        try {
+            const categories = await this.categoryService.getAllCategories()
+            return res.status(200).json(categories)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     res.json({
-//         status: 'success',
-//         message: 'Category created successfully',
-//         category,
-//     })
-// })
+    async getCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params
+            const category = await this.categoryService.getCategory(
+                convertToObjectId(id),
+            )
 
-// export const updateCategory = asyncHandler(async (req, res, next) => {
-//     const { name } = req.body
-//     if (!name) {
-//         return next(new AppError('please provide a name', 400))
-//     }
-//     //update
-//     const category = await Category.findByIdAndUpdate(
-//         req.params.id,
-//         {
-//             name,
-//         },
-//         {
-//             new: true,
-//         },
-//     )
-//     if (!category) {
-//         return next(new AppError('category not found', 404))
-//     }
-//     res.json({
-//         status: 'success',
-//         message: 'category updated successfully',
-//         category,
-//     })
-// })
+            return res.status(200).json(category)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async updateCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id
+
+            const updatedCategory = await this.categoryService.updateCategory(
+                convertToObjectId(id),
+                req.body,
+            )
+            return res.status(200).json(updatedCategory)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async deleteCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id
+            await this.categoryService.deleteCategory(convertToObjectId(id))
+            return res.status(204).send()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
