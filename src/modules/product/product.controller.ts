@@ -12,10 +12,9 @@ export class ProductController {
     async createProduct(req: Request, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.userId
-            const productData = req.body
 
             const product = await this.productService.createProduct(
-                productData,
+                req.body,
                 userId!,
             )
             return res.status(201).json(product)
@@ -49,11 +48,10 @@ export class ProductController {
     async updateProduct(req: Request, res: Response, next: NextFunction) {
         try {
             const id = req.params.id
-            const productData = req.body
 
             const updatedProduct = await this.productService.updateProduct(
                 convertToObjectId(id),
-                productData,
+                req.body,
             )
             return res.status(200).json(updatedProduct)
         } catch (error) {
@@ -74,11 +72,10 @@ export class ProductController {
     async applyDiscount(req: Request, res: Response, next: NextFunction) {
         try {
             const id = req.params.id
-            const { discount } = req.body
 
             const updatedProduct = await this.productService.applyDiscount(
                 convertToObjectId(id),
-                discount,
+                req.body,
             )
             return res.status(200).json(updatedProduct)
         } catch (error) {
