@@ -1,44 +1,59 @@
 import { ICategory } from '../../models'
 import { CategoryRepository } from '../../repositories'
-import { ConflictError } from '../../shared/errors/errors'
+import { ErrorMessages } from '../../shared/constants/errorMessages'
+import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
+import { CreateCategoryDTO, UpdateCategoryDTO } from './category.dtos'
 
 export class CategoryService {
     private readonly categoryRepository: CategoryRepository
+
     constructor() {
         this.categoryRepository = new CategoryRepository()
     }
 
-    async createCategory(
-        name: string,
-        userId: ID,
-        imagePath?: string,
-    ): Promise<ICategory> {
-        const categoryExists = await this.categoryRepository.exists({ name })
-        if (categoryExists) {
-            throw new ConflictError('Category already exists')
+    async createCategory(data: CreateCategoryDTO): Promise<ICategory> {
+        const existingCategory = await this.categoryRepository.findOne({
+            name: data.name,
+        })
+        if (existingCategory) {
+            throw new BadRequestError(ErrorMessages.CATEGORY_ALREADY_EXISTS)
         }
 
-        return this.categoryRepository.create({
-            name: name.toLowerCase(),
-            user: userId,
-            image: imagePath,
-        })
-    }
-
-    async getCategoryByName(name: string): Promise<ICategory> {
-        return this.categoryRepository.findOne({ name })
-    }
-
-    async updateCategory(id: ID, name: string): Promise<ICategory> {
-        return this.categoryRepository.updateById(id, { name })
+        return this.categoryRepository.create(data)
     }
 
     async getAllCategories(): Promise<ICategory[]> {
-        return this.categoryRepository.findAll()
+        return this.categoryRepository.findAll({})
     }
 
-    async deleteCategory(id: ID): Promise<ICategory> {
-        return this.categoryRepository.deleteById(id)
+    async getCategory(categoryId: ID): Promise<ICategory> {
+        const category = await this.categoryRepository.findById(categoryId)
+        if (!category) {
+            throw new NotFoundError(ErrorMessages.CATEGORY_NOT_FOUND)
+        }
+
+        return category
+    }
+
+    async updateCategory(
+        categoryId: ID,
+        data: UpdateCategoryDTO,
+    ): Promise<ICategory> {
+        const categoryExist = await this.categoryRepository.findById(categoryId)
+        if (!categoryExist) {
+            throw new NotFoundError(ErrorMessages.CATEGORY_NOT_FOUND)
+        }
+
+        return this.categoryRepository.updateById(categoryId, data)
+    }
+
+    async deleteCategory(categoryId: ID): Promise<void> {
+        const category = await this.categoryRepository.findById(categoryId)
+        if (!category) {
+            throw new NotFoundError(ErrorMessages.CATEGORY_NOT_FOUND)
+        }
+
+        await this.categoryRepository.softDeleteById(categoryId)
     }
 }
