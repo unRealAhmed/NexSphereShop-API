@@ -1,9 +1,41 @@
 import { z } from 'zod'
-import { IDArraySchema, IDSchema } from './id.schema'
+import { IDSchema } from './id.schema'
 
-export const categorySchema = z.object({
-    name: z.string().min(1, 'Category name is required.'),
-    user: IDSchema,
-    image: z.string().optional(),
-    products: IDArraySchema,
+// ----------------------
+// Shared Schemas
+// ----------------------
+
+const nameSchema = z
+    .string()
+    .min(1, { message: 'Name is required.' })
+    .max(100, { message: 'Name must not exceed 100 characters.' })
+
+// ----------------------
+// Specific Schemas
+// ----------------------
+
+const createCategorySchema = z.object({
+    name: nameSchema,
 })
+
+const updateCategorySchema = z.object({
+    name: nameSchema.optional(),
+})
+
+// ----------------------
+// Aggregated Category Schemas
+// ----------------------
+
+export const categorySchemas = {
+    createCategory: {
+        body: createCategorySchema,
+    },
+    updateCategory: {
+        body: updateCategorySchema,
+    },
+    findCategoryById: {
+        params: z.object({
+            id: IDSchema,
+        }),
+    },
+}
