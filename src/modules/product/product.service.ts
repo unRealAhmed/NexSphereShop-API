@@ -48,7 +48,6 @@ export class ProductService {
             originalPrice: data.price,
         })
 
-        categoryFound.products?.push(product._id)
         brandFound.products?.push(product._id)
         await categoryFound.save()
         await brandFound.save()
