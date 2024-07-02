@@ -1,12 +1,12 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
+import User from './user.model'
 
 export interface ICategory extends AbstractDocument {
     name: string
-    user: ID
+    createdBy: ID
     image?: string
-    products?: ID[]
 }
 
 const categorySchema = new Schema<ICategory>(
@@ -14,22 +14,17 @@ const categorySchema = new Schema<ICategory>(
         name: {
             type: String,
             required: true,
+            unique: true,
         },
-        user: {
+        createdBy: {
             type: Schema.Types.ObjectId,
-            ref: 'User',
+            ref: User.name,
             required: true,
         },
         image: {
             type: String,
             // required: false, // Removed the required validation
         },
-        products: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: 'Product',
-            },
-        ],
     },
     { timestamps: true },
 )
