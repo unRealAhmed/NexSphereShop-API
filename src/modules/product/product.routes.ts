@@ -3,7 +3,7 @@ import { extractUserFromToken } from '../../middlewares/auth'
 import { validate } from '../../middlewares/validation.middleware'
 import { createRoute } from '../../shared/helpers/routeHelper'
 import { productSchemas } from '../../validations'
-import { ProductController } from './productController'
+import { ProductController } from './product.controller'
 
 const router = express.Router()
 const productController = new ProductController()
