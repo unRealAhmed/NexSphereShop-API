@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { EmailService } from '../../shared/helpers/email'
 import { welcomeHtmlTemplate } from '../../shared/utils'
 import { AuthService } from './auth.service'
@@ -38,7 +39,7 @@ export class AuthController {
             await this.authService.logout(userId!, res)
             res.status(200).json({
                 status: 'success',
-                message: 'Successfully logged out',
+                message: ErrorMessages.LOGOUT_SUCCESS,
             })
         } catch (error) {
             next(error)
@@ -53,7 +54,7 @@ export class AuthController {
             await this.authService.forgotPassword(email, protocol, host)
             res.status(200).json({
                 status: 'success',
-                message: 'Password reset token sent to email',
+                message: ErrorMessages.PASSWORD_RESET_TOKEN_SENT,
             })
         } catch (error) {
             next(error)
@@ -80,7 +81,7 @@ export class AuthController {
             if (!refreshToken) {
                 return res.status(401).json({
                     status: 'fail',
-                    message: 'Refresh token missing',
+                    message: ErrorMessages.REFRESH_TOKEN_MISSING,
                 })
             }
 
