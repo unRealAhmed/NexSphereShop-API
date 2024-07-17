@@ -17,4 +17,7 @@ export const ErrorMessages = {
     REFRESH_TOKEN_NOT_VALID: 'Refresh token is not valid',
     USER_WITH_THIS_EMAIL_NOT_FOUND: 'User with this email not found',
     INVALID_OR_EXPIRED_TOKEN: 'Invalid or expired token',
+    LOGOUT_SUCCESS: 'Successfully logged out',
+    REFRESH_TOKEN_MISSING: 'Refresh token missing',
+    PASSWORD_RESET_TOKEN_SENT: 'Password reset token sent to email',
 }
