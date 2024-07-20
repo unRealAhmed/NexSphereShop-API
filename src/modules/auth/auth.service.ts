@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { Response } from 'express'
 import { UserRepository } from '../../repositories'
 import { RefreshTokenRepository } from '../../repositories/refreshToken.repository'
-import { ErrorMessages } from '../../shared/constants/errorMessages' // Importing error messages
+import { ErrorMessages } from '../../shared/constants/errorMessages'
 import {
     BadRequestError,
     ConflictError,
@@ -35,7 +35,6 @@ export class AuthService {
         this.refreshTokenRepository = new RefreshTokenRepository()
     }
 
-    // Sign up a new user
     async signUp(data: SignUpBody, res: Response): Promise<SignUpResponse> {
         const { email } = data
         if (email) {
