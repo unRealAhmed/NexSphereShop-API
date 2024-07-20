@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { Response } from 'express'
 import { UserRepository } from '../../repositories'
 import { RefreshTokenRepository } from '../../repositories/refreshToken.repository'
+import { ErrorMessages } from '../../shared/constants/errorMessages' // Importing error messages
 import {
     BadRequestError,
     ConflictError,
@@ -20,11 +21,8 @@ import {
     setTokensOnResponse,
     verifyRefreshToken,
 } from '../../shared/utils/token'
-import {
-    LoginResponse,
-    SignUpResponse,
-} from './auth.types'
-import { SignUpBody, ResetPasswordBody } from './auth.dtos'
+import { ResetPasswordBody, SignUpBody } from './auth.dtos'
+import { LoginResponse, SignUpResponse } from './auth.types'
 
 export class AuthService {
     private userRepository: UserRepository
@@ -43,7 +41,7 @@ export class AuthService {
         if (email) {
             const existingUser = await this.userRepository.findOne({ email })
             if (existingUser) {
-                throw new ConflictError('Email already exists')
+                throw new ConflictError(ErrorMessages.EMAIL_ALREADY_IN_USE)
             }
         }
 
@@ -83,11 +81,13 @@ export class AuthService {
         res: Response,
     ): Promise<LoginResponse> {
         const user = await this.userRepository.findByEmail(email)
-        if (!user) throw new BadRequestError('Wrong email or password')
+        if (!user)
+            throw new BadRequestError(ErrorMessages.WRONG_EMAIL_OR_PASSWORD)
 
         const isPasswordCorrect = await comparePassword(password, user.password)
-        if (!isPasswordCorrect)
-            throw new BadRequestError('Wrong email or password')
+        if (!isPasswordCorrect) {
+            throw new BadRequestError(ErrorMessages.WRONG_EMAIL_OR_PASSWORD)
+        }
 
         const accessToken = createJwtToken(user._id, user.role)
         const refreshToken = createRefreshToken(user._id, user.role)
@@ -122,19 +122,20 @@ export class AuthService {
         res: Response,
     ): Promise<LoginResponse> {
         const tokenPayload = verifyRefreshToken(oldRefreshToken)
-        if (!tokenPayload) throw new UnauthorizedError('Invalid refresh token')
+        if (!tokenPayload)
+            throw new UnauthorizedError(ErrorMessages.INVALID_REFRESH_TOKEN)
 
         const { id: userId } = tokenPayload
 
         const user = await this.userRepository.findById(userId)
-        if (!user) throw new NotFoundError('User not found')
+        if (!user) throw new NotFoundError(ErrorMessages.USER_NOT_FOUND)
 
         const storedRefreshToken = await this.refreshTokenRepository.findOne({
             userId,
             token: oldRefreshToken,
         })
         if (!storedRefreshToken) {
-            throw new UnauthorizedError('Refresh token is not valid')
+            throw new UnauthorizedError(ErrorMessages.REFRESH_TOKEN_NOT_VALID)
         }
 
         const newAccessToken = createJwtToken(user._id, user.role)
@@ -165,7 +166,10 @@ export class AuthService {
         host: string,
     ): Promise<void> {
         const user = await this.userRepository.findByEmail(email)
-        if (!user) throw new NotFoundError('User with this email not found')
+        if (!user)
+            throw new NotFoundError(
+                ErrorMessages.USER_WITH_THIS_EMAIL_NOT_FOUND,
+            )
 
         const { resetToken, hashedToken, expiresAt } =
             createPasswordResetToken()
@@ -192,7 +196,8 @@ export class AuthService {
             passwordResetExpires: { $gt: Date.now() },
         })
 
-        if (!user) throw new BadRequestError('Invalid or expired token')
+        if (!user)
+            throw new BadRequestError(ErrorMessages.INVALID_OR_EXPIRED_TOKEN)
 
         user.password = await hashPassword(data.newPassword)
         user.passwordResetToken = undefined
