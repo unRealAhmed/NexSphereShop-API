@@ -10,4 +10,11 @@ export const ErrorMessages = {
     FAILED_TO_UPDATE_USER: 'Failed to update user',
     NEW_PASSWORDS_MUST_MATCH: 'New passwords must match',
     INCORRECT_PASSWORD: 'Incorrect password',
+
+    // Auth related errors
+    WRONG_EMAIL_OR_PASSWORD: 'Wrong email or password',
+    INVALID_REFRESH_TOKEN: 'Invalid refresh token',
+    REFRESH_TOKEN_NOT_VALID: 'Refresh token is not valid',
+    USER_WITH_THIS_EMAIL_NOT_FOUND: 'User with this email not found',
+    INVALID_OR_EXPIRED_TOKEN: 'Invalid or expired token',
 }
