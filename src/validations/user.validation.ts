@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 // ----------------------
 // Shared Schemas
@@ -6,21 +6,19 @@ import { z } from 'zod';
 
 const passwordSchema = z
     .string()
-    .min(6, 'Password must be at least 6 characters long.');
+    .min(6, 'Password must be at least 6 characters long.')
 
-const emailSchema = z
-    .string()
-    .email({ message: 'Invalid email address.' });
+const emailSchema = z.string().email({ message: 'Invalid email address.' })
 
 const fullnameSchema = z
     .string()
     .min(3, { message: 'Full name must be at least 3 characters long.' })
-    .max(50, { message: 'Full name must not exceed 50 characters.' });
+    .max(50, { message: 'Full name must not exceed 50 characters.' })
 
 const passwordConfirmationFields = {
     password: passwordSchema,
     passwordConfirm: z.string(),
-};
+}
 
 // ----------------------
 // Specific Schemas
@@ -32,27 +30,29 @@ const registrationSchema = z
         email: emailSchema,
         ...passwordConfirmationFields,
     })
-    .refine((data) => data.password === data.passwordConfirm, {
+    .refine(data => data.password === data.passwordConfirm, {
         message: 'Passwords must match.',
         path: ['passwordConfirm'],
-    });
+    })
 
 const createUserSchema = z
     .object({
         fullname: fullnameSchema,
         email: emailSchema,
         ...passwordConfirmationFields,
-        role: z.enum(['admin', 'user'], { required_error: 'Role is required.' }),
+        role: z.enum(['admin', 'user'], {
+            required_error: 'Role is required.',
+        }),
     })
-    .refine((data) => data.password === data.passwordConfirm, {
+    .refine(data => data.password === data.passwordConfirm, {
         message: 'Passwords must match.',
         path: ['passwordConfirm'],
-    });
+    })
 
 const loginSchema = z.object({
     email: emailSchema,
     password: passwordSchema,
-});
+})
 
 const updateUserSchema = z.object({
     fullname: fullnameSchema.optional(),
@@ -69,7 +69,7 @@ const updateUserSchema = z.object({
             phone: z.string().optional(),
         })
         .optional(),
-});
+})
 
 const updateShippingAddressSchema = z.object({
     shippingAddress: z.object({
@@ -82,13 +82,13 @@ const updateShippingAddressSchema = z.object({
         country: z.string().optional(),
         phone: z.string().optional(),
     }),
-});
+})
 
 const updateCurrentUserSchema = z.object({
     fullname: fullnameSchema.optional(),
     email: emailSchema.optional(),
-    shippingAddress: updateShippingAddressSchema.optional()
-});
+    shippingAddress: updateShippingAddressSchema.optional(),
+})
 
 const updatePasswordSchema = z
     .object({
@@ -96,14 +96,20 @@ const updatePasswordSchema = z
         newPassword: passwordSchema,
         passwordConfirm: z.string(),
     })
-    .refine((data) => data.newPassword === data.passwordConfirm, {
+    .refine(data => data.newPassword === data.passwordConfirm, {
         message: 'New passwords must match.',
         path: ['passwordConfirm'],
-    });
+    })
 
 const assignRoleSchema = z.object({
     role: z.enum(['admin', 'user'], { required_error: 'Role is required.' }),
-});
+})
+
+const forgotPasswordSchema = z.object({
+    body: z.object({
+        email: emailSchema,
+    }),
+})
 
 /*
 export const findAllUsersSchema = z.object({
@@ -152,9 +158,13 @@ export const userSchemas = {
         body: assignRoleSchema,
     },
 
+    forgotPassword: {
+        body: forgotPasswordSchema,
+    },
+
     /*
     findAllUsers: {
       query: findAllUsersSchema,
     },
     */
-};
+}
