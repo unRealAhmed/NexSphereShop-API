@@ -4,6 +4,7 @@ import {
     CategoryRepository,
     ProductRepository,
 } from '../../repositories'
+import { ErrorMessages } from '../../shared/constants/errorMessages' // Import the error messages
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
 import { ID } from '../../shared/types'
@@ -29,14 +30,14 @@ export class ProductService {
             convertToObjectId(data.brand),
         )
         if (!brandFound) {
-            throw new BadRequestError('Brand not found')
+            throw new BadRequestError(ErrorMessages.BRAND_NOT_FOUND)
         }
 
         const categoryFound = await this.categoryRepository.findById(
             convertToObjectId(data.category),
         )
         if (!categoryFound) {
-            throw new BadRequestError('Category not found')
+            throw new BadRequestError(ErrorMessages.CATEGORY_NOT_FOUND)
         }
 
         const product = await this.productRepository.create({
@@ -62,7 +63,7 @@ export class ProductService {
     async getProduct(productId: ID) {
         const product = await this.productRepository.findById(productId)
         if (!product) {
-            throw new NotFoundError('Product not found')
+            throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
         }
 
         return {
@@ -77,14 +78,15 @@ export class ProductService {
     ): Promise<IProduct> {
         const productExist = await this.productRepository.findById(productId)
 
-        if (!productExist) throw new NotFoundError('Product not found')
+        if (!productExist)
+            throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
 
         if (data.brand) {
             const brandFound = await this.brandRepository.findById(
                 convertToObjectId(data.brand),
             )
             if (!brandFound) {
-                throw new BadRequestError('Brand not found')
+                throw new BadRequestError(ErrorMessages.BRAND_NOT_FOUND)
             }
         }
 
@@ -93,7 +95,7 @@ export class ProductService {
                 convertToObjectId(data.category),
             )
             if (!categoryFound) {
-                throw new BadRequestError('Category not found')
+                throw new BadRequestError(ErrorMessages.CATEGORY_NOT_FOUND)
             }
         }
 
@@ -106,7 +108,7 @@ export class ProductService {
     async deleteProduct(productId: ID): Promise<void> {
         const product = await this.productRepository.findById(productId)
         if (!product) {
-            throw new NotFoundError('Product not found')
+            throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
         }
 
         await this.productRepository.deleteById(productId)
@@ -119,7 +121,7 @@ export class ProductService {
     async applyDiscount(productId: ID, discount: number): Promise<IProduct> {
         const product = await this.productRepository.findById(productId)
         if (!product) {
-            throw new NotFoundError('Product not found')
+            throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
         }
 
         const originalPrice = product.originalPrice || product.price
@@ -135,7 +137,7 @@ export class ProductService {
     async removeDiscount(productId: ID): Promise<IProduct> {
         const product = await this.productRepository.findById(productId)
         if (!product) {
-            throw new NotFoundError('Product not found')
+            throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
         }
 
         return this.productRepository.updateById(productId, {
