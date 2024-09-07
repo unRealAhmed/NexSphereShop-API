@@ -80,10 +80,7 @@ export class ProductController {
                 convertToObjectId(id),
                 discount,
             )
-            return res.status(200).json({
-                status: 'success',
-                data: updatedProduct,
-            })
+            return res.status(200).json(updatedProduct)
         } catch (error) {
             next(error)
         }
@@ -95,10 +92,7 @@ export class ProductController {
             const updatedProduct = await this.productService.removeDiscount(
                 convertToObjectId(id),
             )
-            return res.status(200).json({
-                status: 'success',
-                data: updatedProduct,
-            })
+            return res.status(200).json(updatedProduct)
         } catch (error) {
             next(error)
         }
