@@ -61,8 +61,8 @@ const statusSchema = z.enum(ProductStatusValues).optional()
 const createProductSchema = z.object({
     name: nameSchema,
     description: descriptionSchema,
-    // brand: IDSchema,
-    // category: IDSchema,
+    brand: IDSchema,
+    category: IDSchema,
     sizes: sizesSchema,
     colors: colorsSchema,
     price: priceSchema,
