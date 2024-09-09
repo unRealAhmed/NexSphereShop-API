@@ -18,10 +18,7 @@ export class ProductController {
                 productData,
                 userId!,
             )
-            return res.status(201).json({
-                status: 'success',
-                data: product,
-            })
+            return res.status(201).json(product)
         } catch (error) {
             next(error)
         }
@@ -30,10 +27,7 @@ export class ProductController {
     async getAllProducts(req: Request, res: Response, next: NextFunction) {
         try {
             const products = await this.productService.getAllProducts(req.query)
-            return res.status(200).json({
-                status: 'success',
-                data: products,
-            })
+            return res.status(200).json(products)
         } catch (error) {
             next(error)
         }
@@ -41,22 +35,12 @@ export class ProductController {
 
     async getProduct(req: Request, res: Response, next: NextFunction) {
         try {
-            const productId = req.params.id
+            const { id } = req.params
             const product = await this.productService.getProduct(
-                convertToObjectId(productId),
+                convertToObjectId(id),
             )
 
-            if (!product) {
-                return res.status(404).json({
-                    status: 'error',
-                    message: 'Product not found.',
-                })
-            }
-
-            return res.status(200).json({
-                status: 'success',
-                data: product,
-            })
+            return res.status(200).json(product)
         } catch (error) {
             next(error)
         }
@@ -64,17 +48,14 @@ export class ProductController {
 
     async updateProduct(req: Request, res: Response, next: NextFunction) {
         try {
-            const productId = req.params.id
+            const id = req.params.id
             const productData = req.body
 
             const updatedProduct = await this.productService.updateProduct(
-                convertToObjectId(productId),
+                convertToObjectId(id),
                 productData,
             )
-            return res.status(200).json({
-                status: 'success',
-                data: updatedProduct,
-            })
+            return res.status(200).json(updatedProduct)
         } catch (error) {
             next(error)
         }
@@ -82,10 +63,8 @@ export class ProductController {
 
     async deleteProduct(req: Request, res: Response, next: NextFunction) {
         try {
-            const productId = req.params.id
-            await this.productService.deleteProduct(
-                convertToObjectId(productId),
-            )
+            const id = req.params.id
+            await this.productService.deleteProduct(convertToObjectId(id))
             return res.status(204).send()
         } catch (error) {
             next(error)
@@ -94,11 +73,11 @@ export class ProductController {
 
     async applyDiscount(req: Request, res: Response, next: NextFunction) {
         try {
-            const productId = req.params.id
+            const id = req.params.id
             const { discount } = req.body
 
             const updatedProduct = await this.productService.applyDiscount(
-                convertToObjectId(productId),
+                convertToObjectId(id),
                 discount,
             )
             return res.status(200).json({
@@ -112,9 +91,9 @@ export class ProductController {
 
     async removeDiscount(req: Request, res: Response, next: NextFunction) {
         try {
-            const productId = req.params.id
+            const id = req.params.id
             const updatedProduct = await this.productService.removeDiscount(
-                convertToObjectId(productId),
+                convertToObjectId(id),
             )
             return res.status(200).json({
                 status: 'success',
