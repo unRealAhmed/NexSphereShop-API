@@ -25,38 +25,32 @@ export class ProductService {
     }
 
     async createProduct(data: CreateProductDTO, userId: ID): Promise<IProduct> {
-        const existingProduct = await this.productRepository.exists({
-            name: data.name,
-        })
-        if (existingProduct) {
-            throw new BadRequestError('Product already exists')
+        const brandFound = await this.brandRepository.findById(
+            convertToObjectId(data.brand),
+        )
+        if (!brandFound) {
+            throw new BadRequestError('Brand not found')
         }
 
-        // const brandFound = await this.brandRepository.findById(
-        //     convertToObjectId(brand),
-        // )
-        // if (!brandFound) {
-        //     throw new BadRequestError('Brand not found')
-        // }
-
-        // const categoryFound = await this.categoryRepository.findById(
-        //     convertToObjectId(category),
-        // )
-        // if (!categoryFound) {
-        //     throw new BadRequestError('Category not found')
-        // }
+        const categoryFound = await this.categoryRepository.findById(
+            convertToObjectId(data.category),
+        )
+        if (!categoryFound) {
+            throw new BadRequestError('Category not found')
+        }
 
         const product = await this.productRepository.create({
             ...data,
-            // category: convertToObjectId(category),
-            // brand: convertToObjectId(brand),
+            category: categoryFound._id,
+            brand: brandFound._id,
             createdBy: userId,
+            originalPrice: data.price,
         })
 
-        // categoryFound.products?.push(product._id)
-        // brandFound.products?.push(product._id)
-        // await categoryFound.save()
-        // await brandFound.save()
+        categoryFound.products?.push(product._id)
+        brandFound.products?.push(product._id)
+        await categoryFound.save()
+        await brandFound.save()
 
         return product
     }
@@ -65,14 +59,14 @@ export class ProductService {
         return this.productRepository.findAll({ ...filter })
     }
 
-    async getProduct(productId: ID): Promise<IProduct & { qtyLeft: number }> {
+    async getProduct(productId: ID) {
         const product = await this.productRepository.findById(productId)
         if (!product) {
             throw new NotFoundError('Product not found')
         }
 
         return {
-            ...product.toObject(),
+            ...product,
             qtyLeft: this.calculateQtyLeft(product),
         }
     }
@@ -81,6 +75,10 @@ export class ProductService {
         productId: ID,
         data: UpdateProductDTO,
     ): Promise<IProduct> {
+        const productExist = await this.productRepository.findById(productId)
+
+        if (!productExist) throw new NotFoundError('Product not found')
+
         if (data.brand) {
             const brandFound = await this.brandRepository.findById(
                 convertToObjectId(data.brand),
@@ -99,12 +97,10 @@ export class ProductService {
             }
         }
 
-        const product = await this.productRepository.updateById(productId, data)
-        if (!product) {
-            throw new NotFoundError('Product not found')
-        }
-
-        return product
+        return this.productRepository.updateById(productId, {
+            ...data,
+            originalPrice: data.price ? data.price : productExist.originalPrice,
+        })
     }
 
     async deleteProduct(productId: ID): Promise<void> {
@@ -126,15 +122,14 @@ export class ProductService {
             throw new NotFoundError('Product not found')
         }
 
-        if (!product.originalPrice) {
-            product.originalPrice = product.price
-        }
+        const originalPrice = product.originalPrice || product.price
+        const newPrice = originalPrice - discount
 
-        product.price -= discount
-        product.discount = discount
-        await product.save()
-
-        return product
+        return this.productRepository.updateById(productId, {
+            price: newPrice,
+            discount,
+            originalPrice,
+        })
     }
 
     async removeDiscount(productId: ID): Promise<IProduct> {
@@ -143,11 +138,10 @@ export class ProductService {
             throw new NotFoundError('Product not found')
         }
 
-        product.price = product.originalPrice
-        product.discount = 0
-        await product.save()
-
-        return product
+        return this.productRepository.updateById(productId, {
+            price: product.originalPrice,
+            discount: 0,
+        })
     }
 
     async getLowStockProducts(threshold: number): Promise<IProduct[]> {
