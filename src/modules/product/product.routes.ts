@@ -30,7 +30,7 @@ createRoute(
 createRoute(
     router,
     'get',
-    '/:productId',
+    '/:id',
     validate(productSchemas.findProductById),
     productController.getProduct.bind(productController),
 )
@@ -39,7 +39,7 @@ createRoute(
 createRoute(
     router,
     'patch',
-    '/:productId',
+    '/:id',
     extractUserFromToken,
     validate(productSchemas.updateProduct),
     productController.updateProduct.bind(productController),
@@ -49,7 +49,7 @@ createRoute(
 createRoute(
     router,
     'delete',
-    '/:productId',
+    '/:id',
     extractUserFromToken,
     productController.deleteProduct.bind(productController),
 )
@@ -57,7 +57,7 @@ createRoute(
 createRoute(
     router,
     'patch',
-    '/:productId/discount',
+    '/:id/discount',
     extractUserFromToken,
     validate(productSchemas.applyDiscount),
     productController.applyDiscount.bind(productController),
@@ -67,7 +67,7 @@ createRoute(
 createRoute(
     router,
     'patch',
-    '/:productId/discount/remove',
+    '/:id/discount/remove',
     extractUserFromToken,
     productController.removeDiscount.bind(productController),
 )
