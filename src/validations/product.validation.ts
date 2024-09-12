@@ -52,7 +52,7 @@ const lowStockThresholdSchema = z
     })
     .optional()
 
-const statusSchema = z.enum(ProductStatusValues)
+const statusSchema = z.enum(ProductStatusValues).optional()
 
 // ----------------------
 // Specific Schemas
