@@ -50,6 +50,18 @@ paths:
                                     message:
                                         type: string
                                         example: Invalid product data
+            examples:
+                application/json:
+                    value:
+                        name: 'Cool T-Shirt'
+                        description: 'A cool t-shirt for summer.'
+                        price: 29.99
+                        totalQuantity: 100
+                        discount: 10
+                        sizes: ['S', 'M', 'L']
+                        colors: ['Red', 'Blue']
+                        lowStockThreshold: 10
+                        status: 'active'
 
         get:
             tags:
@@ -70,6 +82,31 @@ paths:
                                         type: array
                                         items:
                                             $ref: '#/components/schemas/ProductResponse'
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        data:
+                            - id: '1'
+                              name: 'Cool T-Shirt'
+                              description: 'A cool t-shirt for summer.'
+                              price: 29.99
+                              totalQuantity: 100
+                              discount: 10
+                              sizes: ['S', 'M']
+                              colors: ['Red', 'Blue']
+                              lowStockThreshold: 10
+                              status: 'active'
+                            - id: '2'
+                              name: 'Stylish Hat'
+                              description: 'A stylish hat for sunny days.'
+                              price: 19.99
+                              totalQuantity: 50
+                              discount: 0
+                              sizes: ['M', 'L']
+                              colors: ['Black', 'White']
+                              lowStockThreshold: 5
+                              status: 'active'
 
     /api/products/{productId}:
         get:
@@ -109,6 +146,21 @@ paths:
                                     message:
                                         type: string
                                         example: Product not found
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        data:
+                            id: '1'
+                            name: 'Cool T-Shirt'
+                            description: 'A cool t-shirt for summer.'
+                            price: 29.99
+                            totalQuantity: 100
+                            discount: 10
+                            sizes: ['S', 'M']
+                            colors: ['Red', 'Blue']
+                            lowStockThreshold: 10
+                            status: 'active'
 
         patch:
             tags:
@@ -154,6 +206,18 @@ paths:
                                     message:
                                         type: string
                                         example: Product not found
+            examples:
+                application/json:
+                    value:
+                        name: 'Updated Cool T-Shirt'
+                        description: 'An updated description for the cool t-shirt.'
+                        price: 24.99
+                        totalQuantity: 80
+                        discount: 5
+                        sizes: ['M', 'L']
+                        colors: ['Green', 'Blue']
+                        lowStockThreshold: 10
+                        status: 'active'
 
         delete:
             tags:
@@ -182,6 +246,11 @@ paths:
                                     message:
                                         type: string
                                         example: Product not found
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        message: 'Product successfully deleted.'
 
     /api/products/{productId}/discount:
         patch:
@@ -235,6 +304,10 @@ paths:
                                     message:
                                         type: string
                                         example: Product not found
+            examples:
+                application/json:
+                    value:
+                        discount: 20
 
     /api/products/{productId}/discount/remove:
         patch:
@@ -274,6 +347,11 @@ paths:
                                     message:
                                         type: string
                                         example: Product not found
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        message: 'Discount successfully removed.'
 
 components:
     schemas:
@@ -292,7 +370,7 @@ components:
                     type: number
                     example: 99.99
                     description: Price of the product
-                stock:
+                totalQuantity:
                     type: integer
                     example: 100
                     description: Quantity of the product in stock
@@ -300,10 +378,24 @@ components:
                     type: number
                     example: 0
                     description: Initial discount percentage
-            required:
-                - name
-                - price
-                - stock
+                sizes:
+                    type: array
+                    items:
+                        type: string
+                        enum: [S, M, L, XL, XXL]
+                colors:
+                    type: array
+                    items:
+                        type: string
+                lowStockThreshold:
+                    type: integer
+                    example: 10
+                    description: Threshold for low stock notifications
+                status:
+                    type: string
+                    enum: [active, inactive]
+                    example: active
+                    description: Product status
 
         ProductUpdate:
             type: object
@@ -316,35 +408,61 @@ components:
                     example: Updated description of the product.
                 price:
                     type: number
-                    example: 79.99
-                stock:
+                    example: 89.99
+                totalQuantity:
                     type: integer
-                    example: 50
+                    example: 80
                 discount:
                     type: number
-                    example: 0
-            required:
-                - name
-                - price
-                - stock
+                    example: 10
+                sizes:
+                    type: array
+                    items:
+                        type: string
+                colors:
+                    type: array
+                    items:
+                        type: string
+                lowStockThreshold:
+                    type: integer
+                    example: 5
+                status:
+                    type: string
+                    enum: [active, inactive]
+                    example: active
 
         ProductResponse:
             type: object
             properties:
                 id:
                     type: string
+                    example: 1
                 name:
                     type: string
-                    example: Product Name
+                    example: Cool T-Shirt
                 description:
                     type: string
-                    example: A brief description of the product.
+                    example: A cool t-shirt for summer.
                 price:
                     type: number
-                    example: 99.99
-                stock:
+                    example: 29.99
+                totalQuantity:
                     type: integer
                     example: 100
                 discount:
                     type: number
                     example: 10
+                sizes:
+                    type: array
+                    items:
+                        type: string
+                colors:
+                    type: array
+                    items:
+                        type: string
+                lowStockThreshold:
+                    type: integer
+                    example: 10
+                status:
+                    type: string
+                    example: active
