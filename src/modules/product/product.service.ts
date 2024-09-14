@@ -25,38 +25,38 @@ export class ProductService {
     }
 
     async createProduct(data: CreateProductDTO, userId: ID): Promise<IProduct> {
-        const { name, category, brand } = data
-
-        const existingProduct = await this.productRepository.exists({ name })
+        const existingProduct = await this.productRepository.exists({
+            name: data.name,
+        })
         if (existingProduct) {
             throw new BadRequestError('Product already exists')
         }
 
-        const brandFound = await this.brandRepository.findById(
-            convertToObjectId(brand),
-        )
-        if (!brandFound) {
-            throw new BadRequestError('Brand not found')
-        }
+        // const brandFound = await this.brandRepository.findById(
+        //     convertToObjectId(brand),
+        // )
+        // if (!brandFound) {
+        //     throw new BadRequestError('Brand not found')
+        // }
 
-        const categoryFound = await this.categoryRepository.findById(
-            convertToObjectId(category),
-        )
-        if (!categoryFound) {
-            throw new BadRequestError('Category not found')
-        }
+        // const categoryFound = await this.categoryRepository.findById(
+        //     convertToObjectId(category),
+        // )
+        // if (!categoryFound) {
+        //     throw new BadRequestError('Category not found')
+        // }
 
         const product = await this.productRepository.create({
             ...data,
-            category: convertToObjectId(category),
-            brand: convertToObjectId(brand),
+            // category: convertToObjectId(category),
+            // brand: convertToObjectId(brand),
             createdBy: userId,
         })
 
-        categoryFound.products?.push(product._id)
-        brandFound.products?.push(product._id)
-        await categoryFound.save()
-        await brandFound.save()
+        // categoryFound.products?.push(product._id)
+        // brandFound.products?.push(product._id)
+        // await categoryFound.save()
+        // await brandFound.save()
 
         return product
     }
