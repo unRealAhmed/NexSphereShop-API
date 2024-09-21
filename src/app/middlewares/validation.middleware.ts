@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from 'express'
-import { AnyZodObject, ZodError } from 'zod'
+import { AnyZodObject, ZodEffects, ZodError } from 'zod'
+
+type ZodSchema = AnyZodObject | ZodEffects<AnyZodObject>
 
 export const validate =
     (
         schema: Partial<{
-            body: AnyZodObject
-            params: AnyZodObject
-            query: AnyZodObject
+            body: ZodSchema
+            params: ZodSchema
+            query: ZodSchema
         }>,
     ) =>
     (req: Request, res: Response, next: NextFunction) => {
