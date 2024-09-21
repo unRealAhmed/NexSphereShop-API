@@ -1,36 +1,53 @@
 import express from 'express'
 import { extractUserFromToken } from '../../app/middlewares/auth'
 import { validate } from '../../app/middlewares/validation.middleware'
+import { createRoute } from '../../shared/helpers/routeHelper'
 import { userSchemas } from '../../validations'
-import { AuthController } from './auth.Controller'
+import { AuthController } from './auth.controller'
 
 const authRouter = express.Router()
-
 const authController = new AuthController()
 
+// User Signup
+createRoute(
+    authRouter,
+    'post',
+    '/signup',
+    validate(userSchemas.registration),
+    authController.signUp.bind(authController),
+)
+
 // User Login
-authRouter.post(
+createRoute(
+    authRouter,
+    'post',
     '/login',
     validate(userSchemas.login),
     authController.login.bind(authController),
 )
 
 // User Logout
-authRouter.post(
+createRoute(
+    authRouter,
+    'post',
     '/logout',
     extractUserFromToken,
     authController.logout.bind(authController),
 )
 
 // Forgot Password
-authRouter.post(
+createRoute(
+    authRouter,
+    'post',
     '/forgot-password',
     validate(userSchemas.login),
     authController.forgotPassword.bind(authController),
 )
 
 // Reset Password
-authRouter.patch(
+createRoute(
+    authRouter,
+    'patch',
     '/reset-password/:token',
     validate(userSchemas.updatePassword),
     authController.resetPassword.bind(authController),
