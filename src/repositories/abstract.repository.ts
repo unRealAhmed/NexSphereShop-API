@@ -9,6 +9,7 @@ import { InternalServerError, NotFoundError } from '../shared/errors/errors'
 import { ID } from '../shared/types'
 
 export abstract class AbstractRepository<TDocument> {
+    // eslint-disable-next-line no-unused-vars
     protected constructor(protected readonly model: Model<TDocument>) {}
 
     async create(document: Partial<TDocument>): Promise<TDocument> {
@@ -178,7 +179,7 @@ export abstract class AbstractRepository<TDocument> {
     async distinct(
         item: string,
         filter: FilterQuery<TDocument>,
-    ): Promise<any[]> {
+    ): Promise<unknown[]> {
         return this.model.distinct(item, filter)
     }
 }

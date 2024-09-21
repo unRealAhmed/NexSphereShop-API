@@ -1,3 +1,4 @@
+import { Response } from 'express'
 import { CustomError } from './CustomError'
 
 export class NotFoundError extends CustomError {
@@ -13,7 +14,7 @@ export class BadRequestError extends CustomError {
 }
 
 export class UnauthorizedError extends CustomError {
-    constructor(message = 'Unauthorized') {
+    constructor(message = 'Unauthorized', res?: Response) {
         super(message, 401)
     }
 }

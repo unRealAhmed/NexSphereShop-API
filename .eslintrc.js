@@ -16,12 +16,21 @@ module.exports = {
         'new-cap': [0],
         camelcase: [0],
         'no-unused-vars': [
-            'error',
+            'warn',
             {
                 vars: 'all',
                 args: 'after-used',
                 ignoreRestSiblings: false,
             },
         ],
+        '@typescript-eslint/no-unused-vars': [
+            'warn',
+            {
+                vars: 'all',
+                args: 'after-used',
+                ignoreRestSiblings: false,
+            },
+        ],
+        '@typescript-eslint/no-non-null-assertion': 'off',
     },
 }
