@@ -1,45 +1,42 @@
-// import express from 'express'
-// import {
-//     // createUser,
-//     deleteMe,
-//     // getUser,
-//     updateMe,
-//     updateShippingAddress,
-// } from '../controllers/userController'
+import express from 'express'
+import { extractUserFromToken } from '../../app/middlewares/auth'
+import { validate } from '../../app/middlewares/validation.middleware'
+import { userSchemas } from '../../validations'
+import { UserController } from './user.controller'
 
-// import {
-//     forgetPassword,
-//     login,
-//     logout,
-//     protect,
-//     resetPassword,
-//     restrictTo,
-//     signup,
-//     updatePassword,
-// } from '../controllers/auth.Controller'
+const userRouter = express.Router()
 
-// const router = express.Router()
+const userController = new UserController()
 
-// // Authentication routes
-// router.post('/signup', signup)
-// router.post('/login', login)
-// router.get('/logout', logout)
-// router.post('/forgotPassword', forgetPassword)
-// router.patch('/resetPassword/:token', resetPassword)
+// User Signup
+userRouter.post(
+    '/signup',
+    validate(userSchemas.registration),
+    userController.signUp.bind(userController),
+)
 
-// router.use(protect)
+// Update Current User Profile
+userRouter.patch(
+    '/update',
+    extractUserFromToken,
+    validate(userSchemas.update),
+    userController.updateCurrentUser.bind(userController),
+)
 
-// // User routes
-// // router.get('/me', getMe, getUser)
-// router.patch('/updateMyPassword', updatePassword)
-// router.patch('/updateMe', updateMe)
-// router.patch('/updateShipping', updateShippingAddress)
-// router.delete('/deleteMe', deleteMe)
+// Change Password
+userRouter.patch(
+    '/change-password',
+    extractUserFromToken,
+    validate(userSchemas.updatePassword),
+    userController.changePassword.bind(userController),
+)
 
-// // Admin-restricted routes
-// router.use(restrictTo('admin'))
+// Update Shipping Address
+userRouter.patch(
+    '/update-shipping-address',
+    extractUserFromToken,
+    validate(userSchemas.update),
+    userController.updateShippingAddress.bind(userController),
+)
 
-// // router.route('/').get(getAllUsers).post(createUser)
-// // router.route('/:id').get(getUser).patch(updateUser).delete(deleteUser)
-
-// export default router
+export default userRouter
