@@ -1,20 +1,17 @@
 import { NextFunction, Request, Response } from 'express'
-import { ForbiddenError, UnauthorizedError } from '../../shared/errors/errors'
-import { extractUserFromToken } from '../../shared/helpers/auth'
+import { ForbiddenError } from '../../shared/errors/errors'
 
 export function authorizeRoles(...allowedRoles: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {
-        const user = extractUserFromToken(req)
+        const user = req.user
 
         if (!user) {
-            throw new UnauthorizedError()
+            return next(new ForbiddenError('Unauthorized'))
         }
 
-        if (!allowedRoles.includes(user.role)) {
-            throw new ForbiddenError()
+        if (!allowedRoles.includes(user?.role)) {
+            return next(new ForbiddenError('Access denied'))
         }
-
-        res.locals.user = user
 
         next()
     }
