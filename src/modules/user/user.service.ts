@@ -37,7 +37,7 @@ export class UserService {
     }
 
     // we need to define dto for update current user without password
-    async updateCurrentUser(userId: ID, data: Partial<IUser>): Promise<IUser> {
+    updateCurrentUser(userId: ID, data: Partial<IUser>): Promise<IUser> {
         return this.userRepository.updateById(userId, data)
     }
 
