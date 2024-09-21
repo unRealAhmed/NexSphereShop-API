@@ -11,31 +11,6 @@ export class UserService {
         this.userRepository = new UserRepository()
     }
 
-    // Sign up a new user
-    async signUp(data: Partial<IUser>): Promise<IUser> {
-        const { fullname, email, password, passwordConfirm } = data
-        if (email) {
-            const existingUser = await this.userRepository.findByEmail(email)
-            if (existingUser) {
-                throw new Error('Email already exists')
-            }
-        }
-
-        const newUser: IUser = {
-            fullname,
-            email,
-            password,
-            passwordConfirm,
-            role: 'user',
-            active: true,
-            orders: [],
-            hasShippingAddress: false,
-            shippingAddress: undefined,
-        } as unknown as IUser
-
-        return this.userRepository.create(newUser)
-    }
-
     // we need to define dto for update current user without password
     updateCurrentUser(userId: ID, data: Partial<IUser>): Promise<IUser> {
         return this.userRepository.updateById(userId, data)

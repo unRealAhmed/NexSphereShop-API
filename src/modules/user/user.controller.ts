@@ -9,17 +9,6 @@ export class UserController {
     }
 
     // Sign up a new user
-    async signUp(req: Request, res: Response, next: NextFunction) {
-        try {
-            const user = await this.userService.signUp(req.body)
-            res.status(201).json({
-                status: 'success',
-                data: user,
-            })
-        } catch (error) {
-            next(error)
-        }
-    }
 
     async updateCurrentUser(req: Request, res: Response, next: NextFunction) {
         try {

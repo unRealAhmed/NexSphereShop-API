@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { Response } from 'express'
+import { IUser } from '../../models'
 import { UserRepository } from '../../repositories'
 import {
     BadRequestError,
@@ -26,6 +27,31 @@ export class AuthService {
         this.userRepository = new UserRepository()
         this.emailService = new EmailService()
         // this.userService = new UserService()
+    }
+
+    // Sign up a new user
+    async signUp(data: Partial<IUser>): Promise<IUser> {
+        const { fullname, email, password, passwordConfirm } = data
+        if (email) {
+            const existingUser = await this.userRepository.findByEmail(email)
+            if (existingUser) {
+                throw new Error('Email already exists')
+            }
+        }
+
+        const newUser: IUser = {
+            fullname,
+            email,
+            password,
+            passwordConfirm,
+            role: 'user',
+            active: true,
+            orders: [],
+            hasShippingAddress: false,
+            shippingAddress: undefined,
+        } as unknown as IUser
+
+        return this.userRepository.create(newUser)
     }
 
     // Login method
