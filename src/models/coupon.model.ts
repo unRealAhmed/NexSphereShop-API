@@ -1,7 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
-import User from './user.model'
 
 export interface ICoupon extends AbstractDocument {
     code: string
@@ -31,7 +30,7 @@ const couponSchema = new Schema<ICoupon>(
         },
         user: {
             type: Schema.Types.ObjectId,
-            ref: User.name,
+            ref: 'User',
             required: true,
         },
     },

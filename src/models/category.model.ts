@@ -1,8 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
-import Product from './product.model'
-import User from './user.model'
 
 export interface ICategory extends AbstractDocument {
     name: string
@@ -19,7 +17,7 @@ const categorySchema = new Schema<ICategory>(
         },
         user: {
             type: Schema.Types.ObjectId,
-            ref: User.name,
+            ref: 'User',
             required: true,
         },
         image: {
@@ -29,7 +27,7 @@ const categorySchema = new Schema<ICategory>(
         products: [
             {
                 type: Schema.Types.ObjectId,
-                ref: Product.name,
+                ref: 'Product',
             },
         ],
     },

@@ -1,8 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
-import Product from './product.model'
-import User from './user.model'
 
 interface IOrderItem {
     product: ID
@@ -37,14 +35,14 @@ const orderSchema = new Schema<IOrder>(
     {
         user: {
             type: Schema.Types.ObjectId,
-            ref: User.name,
+            ref: 'User',
             required: true,
         },
         orderItems: [
             {
                 product: {
                     type: Schema.Types.ObjectId,
-                    ref: Product.name,
+                    ref: 'Product',
                     required: true,
                 },
                 quantity: { type: Number, required: true },
