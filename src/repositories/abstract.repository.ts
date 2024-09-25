@@ -5,16 +5,16 @@ import {
     ProjectionType,
     UpdateQuery,
 } from 'mongoose'
-import { InternalServerError, NotFoundError } from '../shared/errors/errors'
+import { InternalServerError } from '../shared/errors/errors'
 import { ID } from '../shared/types'
 
 export abstract class AbstractRepository<TDocument> {
     // eslint-disable-next-line no-unused-vars
     protected constructor(protected readonly model: Model<TDocument>) {}
 
-    async create(document: Partial<TDocument>): Promise<TDocument> {
+    create(document: Partial<TDocument>): TDocument {
         try {
-            return this.model.create(document)
+            return this.model.create(document) as TDocument
         } catch (error) {
             throw new InternalServerError(
                 `Failed to create resource ${this.model.modelName}`,
@@ -22,7 +22,7 @@ export abstract class AbstractRepository<TDocument> {
         }
     }
 
-    async findAll<T = TDocument>(options?: {
+    findAll<T = TDocument>(options?: {
         filter?: FilterQuery<TDocument>
         select?: ProjectionType<TDocument>
         skip?: number
@@ -65,72 +65,46 @@ export abstract class AbstractRepository<TDocument> {
             .exec() as unknown as Promise<T[]>
     }
 
-    async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
-        const document = await this.model
+    findOne(filterQuery: FilterQuery<TDocument>): TDocument {
+        const document = this.model
             .findOne({ ...filterQuery, deletedAt: null })
             .lean()
             .exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with the given filter: ${JSON.stringify(filterQuery)}`,
-            )
-        }
-        return document as unknown as TDocument
+
+        return document as TDocument
     }
 
-    async findById(id: ID): Promise<TDocument> {
-        const document = await this.model.findById(id).lean().exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with id: ${id}`,
-            )
-        }
-        return document as unknown as TDocument
+    findById(id: ID): TDocument {
+        const document = this.model.findById(id).lean().exec()
+        return document as TDocument
     }
 
-    async updateById(
-        id: ID,
-        update: UpdateQuery<TDocument>,
-    ): Promise<TDocument> {
-        const document = await this.model
+    updateById(id: ID, update: UpdateQuery<TDocument>): TDocument {
+        const document = this.model
             .findByIdAndUpdate(id, update, { new: true, lean: true })
             .exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with id: ${id}`,
-            )
-        }
-        return document as unknown as TDocument
+        return document as TDocument
     }
 
-    async deleteById(id: ID): Promise<TDocument> {
-        const document = await this.model.findByIdAndDelete(id).exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with id: ${id}`,
-            )
-        }
-        return document
+    deleteById(id: ID): TDocument {
+        const document = this.model.findByIdAndDelete(id).exec()
+
+        return document as TDocument
     }
 
-    async softDeleteById(id: ID): Promise<TDocument> {
-        const document = await this.model
+    softDeleteById(id: ID): TDocument {
+        const document = this.model
             .findByIdAndUpdate(
                 id,
                 { deletedAt: new Date() },
                 { new: true, lean: true },
             )
             .exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with id: ${id}`,
-            )
-        }
-        return document as unknown as TDocument
+        return document as TDocument
     }
 
-    async softDelete(filterQuery: FilterQuery<TDocument>) {
-        const document = await this.model.findOneAndUpdate<TDocument>(
+    softDelete(filterQuery: FilterQuery<TDocument>) {
+        const document = this.model.findOneAndUpdate<TDocument>(
             {
                 ...filterQuery,
                 deletedAt: null,
@@ -139,37 +113,27 @@ export abstract class AbstractRepository<TDocument> {
                 deletedAt: new Date(),
             },
         )
-
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} Document not found.`,
-            )
-        }
-
-        return document as unknown as TDocument
+        return document as TDocument
     }
 
-    async findOneAndUpdate(
+    findOneAndUpdate(
         filterQuery: FilterQuery<TDocument>,
         update: UpdateQuery<TDocument>,
-    ): Promise<TDocument> {
-        const document = await this.model
+    ): TDocument {
+        const document = this.model
             .findOneAndUpdate(filterQuery, update, { new: true, lean: true })
             .exec()
-        if (!document) {
-            throw new NotFoundError(
-                `${this.model.modelName} not found with the given filter: ${JSON.stringify(filterQuery)}`,
-            )
-        }
-        return document as unknown as TDocument
+        return document as TDocument
     }
 
-    public async findByIdAndUpdate(
+    findByIdAndUpdate(
         id: ID,
         update: Partial<TDocument>,
         options = { new: true },
     ) {
-        return this.model.findByIdAndUpdate(id, update, options).exec()
+        return this.model
+            .findByIdAndUpdate(id, update, options)
+            .exec() as TDocument
     }
 
     async exists(filterQuery: FilterQuery<TDocument>): Promise<boolean> {
