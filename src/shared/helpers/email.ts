@@ -1,37 +1,64 @@
-// src/helpers/email.ts
-import nodemailer, { Transporter } from 'nodemailer'
-import { InternalServerError } from '../errors/errors'
+import EventEmitter from 'events'
+import nodemailer from 'nodemailer'
+
+const emailEventEmitter = new EventEmitter()
 
 export class EmailService {
-    private transporter: Transporter
+    private from: string
 
     constructor() {
-        this.transporter = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE, // e.g., Gmail
-            auth: {
-                user: process.env.EMAIL_USERNAME,
-                pass: process.env.EMAIL_PASSWORD,
-            },
-        })
+        this.from =
+            process.env.EMAIL_FROM ||
+            'NexSphereShop Team <noreply@NexSphereShop.io>'
     }
 
-    // Send password reset email
-    async sendPasswordResetEmail(
+    // Send email with event emitter
+    send(subject: string, to: string, message?: string, html?: string): void {
+        const mailOptions = {
+            from: this.from,
+            to,
+            subject,
+            text: message || '',
+            html: html || '',
+        }
+
+        // Emit the 'sendEmail' event with mailOptions
+        emailEventEmitter.emit('sendEmail', mailOptions)
+    }
+
+    // Welcome email
+    sendWelcomeEmail(to: string, htmlContent: string): void {
+        const subject = 'Welcome To NexSphereShop Family 🚀'
+
+        this.send(subject, to, undefined, htmlContent)
+    }
+
+    // Password reset email
+    sendPasswordResetEmail(
         to: string,
         resetURL: string,
         htmlContent: string,
-    ): Promise<void> {
-        const mailOptions = {
-            from: process.env.EMAIL_FROM, // 'YourApp <noreply@yourapp.com>'
-            to,
-            subject: 'Password Reset Request',
-            html: htmlContent,
-        }
-
-        try {
-            await this.transporter.sendMail(mailOptions)
-        } catch (error) {
-            throw new InternalServerError('Failed to send email.') // Bubble up error to service
-        }
+    ): void {
+        const subject = 'Password Reset Request'
+        this.send(subject, to, htmlContent)
     }
 }
+
+// Listen for 'sendEmail' events
+emailEventEmitter.on('sendEmail', async mailOptions => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USERNAME,
+            pass: process.env.EMAIL_PASSWORD,
+        },
+    })
+
+    try {
+        await transporter.sendMail(mailOptions)
+        console.log('Email sent successfully')
+    } catch (error) {
+        console.error('Error sending email:', error)
+        // Log error for debugging but do not throw to the user
+    }
+})
