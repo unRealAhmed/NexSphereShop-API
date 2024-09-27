@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import { UserRepository } from '../../repositories'
-import { UnauthorizedError } from '../../shared/errors/errors'
-import { ID } from '../../shared/types'
+import { UserRepository } from '../repositories'
+import { UnauthorizedError } from '../shared/errors/errors'
+import { ID } from '../shared/types'
 interface ITokenPayload {
     id: ID
     fullname: string

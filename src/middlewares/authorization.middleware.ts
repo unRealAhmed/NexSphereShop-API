@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { ForbiddenError } from '../../shared/errors/errors'
+import { ForbiddenError } from '../shared/errors/errors'
 
 export function authorizeRoles(...allowedRoles: string[]) {
     return (req: Request, res: Response, next: NextFunction): void => {

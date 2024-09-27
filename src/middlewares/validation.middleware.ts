@@ -20,13 +20,7 @@ export const validate =
             next()
         } catch (err) {
             if (err instanceof ZodError) {
-                return res.status(400).json({
-                    status: 'fail',
-                    errors: err.errors.map(e => ({
-                        field: e.path.join('.'),
-                        message: e.message,
-                    })),
-                })
+                return next(err)
             }
             next(err)
         }
