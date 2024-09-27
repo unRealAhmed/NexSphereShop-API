@@ -50,11 +50,6 @@ const userSchema = new Schema<IUser>(
         passwordConfirm: {
             type: String,
             required: true,
-            validate: {
-                validator: function (el: string) {
-                    return el === this.password
-                },
-            },
         },
         role: {
             type: String,
