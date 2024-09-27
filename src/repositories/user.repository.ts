@@ -7,17 +7,21 @@ export class UserRepository extends AbstractRepository<IUser> {
         super(User)
     }
 
-    async findByEmail(email: string) {
+    init(data: Partial<IUser>) {
+        return new User(data)
+    }
+
+    findByEmail(email: string) {
         return this.findOne({ email })
     }
 
-    async updatePassword(id: ID, password: string): Promise<IUser> {
+    updatePassword(id: ID, password: string) {
         return this.model
             .findByIdAndUpdate(id, { password })
             .exec() as unknown as IUser
     }
 
-    async updateShippingAddress(userId: string, address: any) {
+    updateShippingAddress(userId: string, address: any) {
         return this.model.findByIdAndUpdate(
             userId,
             { shippingAddress: address, hasShippingAddress: true },
