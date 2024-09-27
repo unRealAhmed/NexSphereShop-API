@@ -1,8 +1,5 @@
-/* eslint-disable import/prefer-default-export */
 export const resetHtmlTemplate = (
-    protocol: any,
-    host: any,
-    forgotPasswordToken: any,
+    forgotPasswordToken: unknown,
 ) => `<!doctype html>
 <html>
   <head>
