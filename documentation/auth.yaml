@@ -1,0 +1,252 @@
+openapi: 3.0.0
+info:
+    title: Auth API
+    description: API for authentication (signup, login, logout, password management)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+paths:
+    /api/auth/signup:
+        post:
+            summary: Register a new user
+            requestBody:
+                description: User registration data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                fullname:
+                                    type: string
+                                    example: John Doe
+                                    description: Full name of the user
+                                email:
+                                    type: string
+                                    example: john@example.com
+                                    description: Email of the user
+                                password:
+                                    type: string
+                                    format: password
+                                    example: 'strongpassword'
+                                    description: Password for the user account
+                                passwordConfirm:
+                                    type: string
+                                    format: password
+                                    example: 'strongpassword'
+                                    description: Confirmation of the password
+                            required:
+                                - fullname
+                                - email
+                                - password
+                                - passwordConfirm
+            responses:
+                201:
+                    description: User successfully registered
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: object
+                                        properties:
+                                            user:
+                                                $ref: '#/components/schemas/UserResponse'
+
+    /api/auth/login:
+        post:
+            summary: Log in a user
+            requestBody:
+                description: User login data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    example: john@example.com
+                                    description: Email of the user
+                                password:
+                                    type: string
+                                    format: password
+                                    example: 'strongpassword'
+                                    description: Password for the user account
+                            required:
+                                - email
+                                - password
+            responses:
+                200:
+                    description: User successfully logged in
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: object
+                                        properties:
+                                            user:
+                                                $ref: '#/components/schemas/UserResponse'
+                                            token:
+                                                type: string
+                                                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+                                                description: JWT token for authentication
+
+    /api/auth/logout:
+        post:
+            summary: Log out a user
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Successfully logged out
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    message:
+                                        type: string
+                                        example: Successfully logged out
+
+    /api/auth/forgot-password:
+        post:
+            summary: Request a password reset email
+            requestBody:
+                description: Email to send password reset link
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    example: john@example.com
+                                    description: Email of the user
+                            required:
+                                - email
+            responses:
+                200:
+                    description: Password reset email sent
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    message:
+                                        type: string
+                                        example: Password reset token sent to email
+
+    /api/auth/reset-password/{token}:
+        patch:
+            summary: Reset a user's password
+            parameters:
+                - in: path
+                  name: token
+                  required: true
+                  schema:
+                      type: string
+                      example: 'reset-token-string'
+                  description: Token for resetting password
+            requestBody:
+                description: New password data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                newPassword:
+                                    type: string
+                                    format: password
+                                    example: 'newstrongpassword'
+                                    description: New password for the user account
+                                passwordConfirm:
+                                    type: string
+                                    format: password
+                                    example: 'newstrongpassword'
+                                    description: Confirmation of the new password
+                            required:
+                                - newPassword
+                                - passwordConfirm
+            responses:
+                200:
+                    description: Password successfully reset
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    message:
+                                        type: string
+                                        example: Password successfully reset
+
+components:
+    schemas:
+        UserResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 60f8f5e2c2e4de001fa6f123
+                fullname:
+                    type: string
+                    example: John Doe
+                email:
+                    type: string
+                    example: john@example.com
+                role:
+                    type: string
+                    enum: ['admin', 'user']
+                    example: user
+                hasShippingAddress:
+                    type: boolean
+                    example: false
+                shippingAddress:
+                    type: object
+                    properties:
+                        firstName:
+                            type: string
+                            example: John
+                        lastName:
+                            type: string
+                            example: Doe
+                        address:
+                            type: string
+                            example: '123 Street Name'
+                        city:
+                            type: string
+                            example: 'City Name'
+                        postalCode:
+                            type: string
+                            example: '12345'
+                        province:
+                            type: string
+                            example: 'State Name'
+                        country:
+                            type: string
+                            example: 'Country Name'
+                        phone:
+                            type: string
+                            example: '123456789'
