@@ -12,7 +12,7 @@ export abstract class AbstractRepository<TDocument> {
     // eslint-disable-next-line no-unused-vars
     protected constructor(protected readonly model: Model<TDocument>) {}
 
-    create(document: Partial<TDocument>): TDocument {
+    async create(document: Partial<TDocument>): Promise<TDocument> {
         try {
             return this.model.create(document) as TDocument
         } catch (error) {
@@ -65,46 +65,42 @@ export abstract class AbstractRepository<TDocument> {
             .exec() as unknown as Promise<T[]>
     }
 
-    findOne(filterQuery: FilterQuery<TDocument>): TDocument {
-        const document = this.model
+    async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
+        return this.model
             .findOne({ ...filterQuery, deletedAt: null })
             .lean()
-            .exec()
-
-        return document as TDocument
+            .exec() as TDocument
     }
 
-    findById(id: ID): TDocument {
-        const document = this.model.findById(id).lean().exec()
-        return document as TDocument
+    async findById(id: ID): Promise<TDocument> {
+        return this.model.findById(id).lean().exec() as TDocument
     }
 
-    updateById(id: ID, update: UpdateQuery<TDocument>): TDocument {
-        const document = this.model
+    async updateById(
+        id: ID,
+        update: UpdateQuery<TDocument>,
+    ): Promise<TDocument> {
+        return this.model
             .findByIdAndUpdate(id, update, { new: true, lean: true })
-            .exec()
-        return document as TDocument
+            .exec() as TDocument
     }
 
-    deleteById(id: ID): TDocument {
-        const document = this.model.findByIdAndDelete(id).exec()
-
-        return document as TDocument
+    async deleteById(id: ID): Promise<TDocument> {
+        return this.model.findByIdAndDelete(id).exec() as TDocument
     }
 
-    softDeleteById(id: ID): TDocument {
-        const document = this.model
+    async softDeleteById(id: ID): Promise<TDocument> {
+        return this.model
             .findByIdAndUpdate(
                 id,
                 { deletedAt: new Date() },
                 { new: true, lean: true },
             )
-            .exec()
-        return document as TDocument
+            .exec() as TDocument
     }
 
-    softDelete(filterQuery: FilterQuery<TDocument>) {
-        const document = this.model.findOneAndUpdate<TDocument>(
+    async softDelete(filterQuery: FilterQuery<TDocument>) {
+        return this.model.findOneAndUpdate<TDocument>(
             {
                 ...filterQuery,
                 deletedAt: null,
@@ -113,20 +109,18 @@ export abstract class AbstractRepository<TDocument> {
                 deletedAt: new Date(),
             },
         )
-        return document as TDocument
     }
 
-    findOneAndUpdate(
+    async findOneAndUpdate(
         filterQuery: FilterQuery<TDocument>,
         update: UpdateQuery<TDocument>,
-    ): TDocument {
-        const document = this.model
+    ): Promise<TDocument> {
+        return this.model
             .findOneAndUpdate(filterQuery, update, { new: true, lean: true })
-            .exec()
-        return document as TDocument
+            .exec() as TDocument
     }
 
-    findByIdAndUpdate(
+    async findByIdAndUpdate(
         id: ID,
         update: Partial<TDocument>,
         options = { new: true },
