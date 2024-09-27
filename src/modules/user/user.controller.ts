@@ -8,8 +8,6 @@ export class UserController {
         this.userService = new UserService()
     }
 
-    // Sign up a new user
-
     async updateCurrentUser(req: Request, res: Response, next: NextFunction) {
         try {
             const updatedUser = await this.userService.updateCurrentUser(
