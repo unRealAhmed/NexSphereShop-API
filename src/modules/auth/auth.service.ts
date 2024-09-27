@@ -1,10 +1,9 @@
 import crypto from 'crypto'
 import { Response } from 'express'
-import { IUser } from '../../models'
 import { UserRepository } from '../../repositories'
 import {
     BadRequestError,
-    InternalServerError,
+    ConflictError,
     NotFoundError,
 } from '../../shared/errors/errors'
 import { EmailService } from '../../shared/helpers/email'
@@ -13,10 +12,10 @@ import {
     createPasswordResetToken,
     hashPassword,
 } from '../../shared/helpers/password'
-import { LoginResponse } from '../../shared/types/login.response'
 import { resetHtmlTemplate } from '../../shared/utils'
 import { clearCookieToken, setCookieToken } from '../../shared/utils/cookies'
 import { createJwtToken } from '../../shared/utils/token'
+import { LoginResponse, SignUpBody, SignUpResponse } from './auth.types'
 
 export class AuthService {
     private userRepository: UserRepository
@@ -30,28 +29,34 @@ export class AuthService {
     }
 
     // Sign up a new user
-    async signUp(data: Partial<IUser>): Promise<IUser> {
-        const { fullname, email, password, passwordConfirm } = data
+    async signUp(data: SignUpBody, res: Response): Promise<SignUpResponse> {
+        const { email } = data
         if (email) {
-            const existingUser = await this.userRepository.findByEmail(email)
+            const existingUser = await this.userRepository.findOne({ email })
+            console.log(existingUser)
             if (existingUser) {
-                throw new Error('Email already exists')
+                throw new ConflictError('Email already exists')
             }
         }
 
-        const newUser: IUser = {
-            fullname,
-            email,
-            password,
-            passwordConfirm,
-            role: 'user',
-            active: true,
-            orders: [],
-            hasShippingAddress: false,
-            shippingAddress: undefined,
-        } as unknown as IUser
+        const user = this.userRepository.init(data)
+        user.password = await hashPassword(data.password)
+        const newUser = await this.userRepository.create(user)
 
-        return this.userRepository.create(newUser)
+        const token = createJwtToken(user._id, user.role)
+        setCookieToken(res, token)
+
+        return {
+            _id: newUser._id,
+            fullname: newUser.fullname,
+            email: newUser.email,
+            role: newUser.role,
+            active: newUser.active,
+            hasShippingAddress: newUser.hasShippingAddress,
+            createdAt: newUser.createdAt,
+            updatedAt: newUser.updatedAt,
+            token,
+        }
     }
 
     // Login method
@@ -67,7 +72,7 @@ export class AuthService {
         if (!isPasswordCorrect)
             throw new BadRequestError('Invalid email or password')
 
-        const token = createJwtToken(user._id)
+        const token = createJwtToken(user._id, user.role)
         setCookieToken(res, token)
 
         return {
@@ -92,38 +97,19 @@ export class AuthService {
         protocol: string,
         host: string,
     ): Promise<void> {
-        // Find the user by email
         const user = await this.userRepository.findByEmail(email)
         if (!user) throw new NotFoundError('User with this email not found')
 
-        // Create password reset token
         const { resetToken, hashedToken, expiresAt } =
             createPasswordResetToken()
         user.passwordResetToken = hashedToken
         user.passwordResetExpires = expiresAt
         await user.save()
 
-        // Construct reset URL
         const resetURL = `${protocol}://${host}/api/v1/users/resetPassword/${resetToken}`
-        const html = resetHtmlTemplate(protocol, host, resetToken)
+        const html = resetHtmlTemplate(resetURL)
 
-        // Send the email
-        try {
-            await this.emailService.sendPasswordResetEmail(
-                user.email,
-                resetURL,
-                html,
-            )
-        } catch (error) {
-            // Reset the token fields if email fails to send
-            user.passwordResetToken = undefined
-            user.passwordResetExpires = undefined
-            await user.save()
-
-            throw new InternalServerError(
-                'There was an error sending the email. Please try again later.',
-            )
-        }
+        this.emailService.sendPasswordResetEmail(user.email, resetURL, html)
     }
 
     // Reset Password method
@@ -147,7 +133,7 @@ export class AuthService {
         user.passwordResetExpires = undefined
         await user.save()
 
-        const jwttoken = createJwtToken(user._id)
+        const jwttoken = createJwtToken(user._id, user.role)
 
         return {
             token: jwttoken,

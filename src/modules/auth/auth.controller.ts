@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
+import { EmailService } from '../../shared/helpers/email'
+import { welcomeHtmlTemplate } from '../../shared/utils'
 import { AuthService } from './auth.service'
 
 export class AuthController {
@@ -10,10 +12,13 @@ export class AuthController {
 
     async signUp(req: Request, res: Response, next: NextFunction) {
         try {
-            const user = await this.authService.signUp(req.body)
+            const user = await this.authService.signUp(req.body, res)
+            const emailService = new EmailService()
+            const html = welcomeHtmlTemplate(user.fullname)
+            emailService.sendWelcomeEmail(user.email, html)
             res.status(201).json({
                 status: 'success',
-                data: user,
+                user,
             })
         } catch (error) {
             next(error)
@@ -33,7 +38,6 @@ export class AuthController {
         }
     }
 
-    // Logout user
     async logout(req: Request, res: Response, next: NextFunction) {
         try {
             await this.authService.logout(res)
@@ -46,7 +50,6 @@ export class AuthController {
         }
     }
 
-    // Forgot Password
     async forgotPassword(req: Request, res: Response, next: NextFunction) {
         try {
             const { email } = req.body
@@ -62,7 +65,6 @@ export class AuthController {
         }
     }
 
-    // Reset Password
     async resetPassword(req: Request, res: Response, next: NextFunction) {
         try {
             const { token } = req.params
