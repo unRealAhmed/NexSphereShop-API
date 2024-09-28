@@ -12,7 +12,7 @@ export class UserRepository extends AbstractRepository<IUser> {
     }
 
     findByEmail(email: string) {
-        return this.findOne({ email })
+        return this.model.findOne({ email }).select('+password').lean().exec()
     }
 
     updatePassword(id: ID, password: string) {
