@@ -30,6 +30,15 @@ app.use(
         message: 'Too many requests from this IP, please try again in an hour!',
     }),
 )
+
+const passwordResetLimiter = rateLimit({
+    max: 5, // Max 5 hits per hour
+    windowMs: 60 * 60 * 1000,
+    message: 'Too many password reset attempts, please try again in an hour!',
+})
+
+app.use('/api/v1/auth/forgotPassword', passwordResetLimiter)
+
 connectDatabase()
 
 // Stripe Webhook
