@@ -11,7 +11,8 @@ export type SignUpResponse = {
     hasShippingAddress: boolean
     createdAt: Date
     updatedAt: Date
-    token: string
+    accessToken: string
+    refreshToken: string
 }
 
 export type SignUpBody = z.infer<typeof userSchemas.registration.body>
@@ -26,5 +27,6 @@ type ResendUserData = {
 
 export type LoginResponse = {
     user: ResendUserData
-    token: string
+    accessToken: string
+    refreshToken: string
 }
