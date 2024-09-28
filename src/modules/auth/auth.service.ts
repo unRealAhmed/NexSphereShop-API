@@ -1,31 +1,35 @@
-import crypto from 'crypto'
 import { Response } from 'express'
 import { UserRepository } from '../../repositories'
+import { RefreshTokenRepository } from '../../repositories/refreshToken.repository'
 import {
     BadRequestError,
     ConflictError,
     NotFoundError,
+    UnauthorizedError,
 } from '../../shared/errors/errors'
 import { EmailService } from '../../shared/helpers/email'
-import {
-    comparePassword,
-    createPasswordResetToken,
-    hashPassword,
-} from '../../shared/helpers/password'
+import { comparePassword, hashPassword } from '../../shared/helpers/password'
+import { ID } from '../../shared/types'
 import { resetHtmlTemplate } from '../../shared/utils'
-import { clearCookieToken, setCookieToken } from '../../shared/utils/cookies'
-import { createJwtToken } from '../../shared/utils/token'
+import { clearCookieToken } from '../../shared/utils/cookies'
+import {
+    createJwtToken,
+    createPasswordResetToken,
+    createRefreshToken,
+    setTokensOnResponse,
+    verifyRefreshToken,
+} from '../../shared/utils/token'
 import { LoginResponse, SignUpBody, SignUpResponse } from './auth.types'
 
 export class AuthService {
     private userRepository: UserRepository
-    // private userService: UserService
+    private refreshTokenRepository: RefreshTokenRepository
     private emailService: EmailService
 
     constructor() {
         this.userRepository = new UserRepository()
         this.emailService = new EmailService()
-        // this.userService = new UserService()
+        this.refreshTokenRepository = new RefreshTokenRepository()
     }
 
     // Sign up a new user
@@ -33,7 +37,6 @@ export class AuthService {
         const { email } = data
         if (email) {
             const existingUser = await this.userRepository.findOne({ email })
-            console.log(existingUser)
             if (existingUser) {
                 throw new ConflictError('Email already exists')
             }
@@ -41,10 +44,19 @@ export class AuthService {
 
         const user = this.userRepository.init(data)
         user.password = await hashPassword(data.password)
+        user.passwordConfirm = undefined
+
         const newUser = await this.userRepository.create(user)
 
-        const token = createJwtToken(user._id, user.role)
-        setCookieToken(res, token)
+        const accessToken = createJwtToken(newUser._id, newUser.role)
+        const refreshToken = createRefreshToken(newUser._id, user.role)
+
+        await this.refreshTokenRepository.create({
+            userId: newUser._id,
+            token: refreshToken,
+        })
+
+        setTokensOnResponse(res, accessToken, refreshToken)
 
         return {
             _id: newUser._id,
@@ -55,28 +67,37 @@ export class AuthService {
             hasShippingAddress: newUser.hasShippingAddress,
             createdAt: newUser.createdAt,
             updatedAt: newUser.updatedAt,
-            token,
+            accessToken,
+            refreshToken,
         }
     }
 
-    // Login method
     async login(
         email: string,
         password: string,
         res: Response,
     ): Promise<LoginResponse> {
         const user = await this.userRepository.findByEmail(email)
-        if (!user) throw new BadRequestError('Invalid email or password')
+        if (!user) throw new BadRequestError('Wrong email or password')
 
         const isPasswordCorrect = await comparePassword(password, user.password)
         if (!isPasswordCorrect)
-            throw new BadRequestError('Invalid email or password')
+            throw new BadRequestError('Wrong email or password')
 
-        const token = createJwtToken(user._id, user.role)
-        setCookieToken(res, token)
+        const accessToken = createJwtToken(user._id, user.role)
+        const refreshToken = createRefreshToken(user._id, user.role)
+
+        await this.refreshTokenRepository.create({
+            userId: user._id,
+            token: refreshToken,
+        })
+
+        // Set tokens in cookies
+        setTokensOnResponse(res, accessToken, refreshToken)
 
         return {
-            token,
+            accessToken,
+            refreshToken,
             user: {
                 _id: user._id,
                 fullname: user.fullname,
@@ -86,12 +107,53 @@ export class AuthService {
         }
     }
 
-    // Logout method
-    async logout(res: Response): Promise<void> {
+    async logout(userId: ID, res: Response): Promise<void> {
+        await this.refreshTokenRepository.deleteByUserId(userId)
         clearCookieToken(res)
     }
 
-    // Forgot Password method
+    async refreshToken(
+        oldRefreshToken: string,
+        res: Response,
+    ): Promise<LoginResponse> {
+        const tokenPayload = verifyRefreshToken(oldRefreshToken)
+        if (!tokenPayload) throw new UnauthorizedError('Invalid refresh token')
+
+        const { id: userId } = tokenPayload
+
+        const user = await this.userRepository.findById(userId)
+        if (!user) throw new NotFoundError('User not found')
+
+        const storedRefreshToken = await this.refreshTokenRepository.findOne({
+            userId,
+            token: oldRefreshToken,
+        })
+        if (!storedRefreshToken) {
+            throw new UnauthorizedError('Refresh token is not valid')
+        }
+
+        const newAccessToken = createJwtToken(user._id, user.role)
+        const newRefreshToken = createRefreshToken(user._id, user.role)
+
+        await this.refreshTokenRepository.findOneAndUpdate(
+            { _id: storedRefreshToken._id },
+            { token: newRefreshToken },
+        )
+
+        setTokensOnResponse(res, newAccessToken, newRefreshToken)
+
+        return {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            user: {
+                _id: user._id,
+                fullname: user.fullname,
+                role: user.role,
+                active: user.active,
+            },
+        }
+    }
+
     async forgotPassword(
         email: string,
         protocol: string,
@@ -112,15 +174,11 @@ export class AuthService {
         this.emailService.sendPasswordResetEmail(user.email, resetURL, html)
     }
 
-    // Reset Password method
     async resetPassword(
         token: string,
         newPassword: string,
     ): Promise<LoginResponse> {
-        const hashedToken = crypto
-            .createHash('sha256')
-            .update(token)
-            .digest('hex')
+        const hashedToken = createPasswordResetToken()
         const user = await this.userRepository.findOne({
             passwordResetToken: hashedToken,
             passwordResetExpires: { $gt: Date.now() },
@@ -136,7 +194,8 @@ export class AuthService {
         const jwttoken = createJwtToken(user._id, user.role)
 
         return {
-            token: jwttoken,
+            accessToken: jwttoken,
+            refreshToken: jwttoken,
             user: {
                 _id: user._id,
                 fullname: user.fullname,

@@ -40,7 +40,8 @@ export class AuthController {
 
     async logout(req: Request, res: Response, next: NextFunction) {
         try {
-            await this.authService.logout(res)
+            const userId = req.user?.userId
+            await this.authService.logout(userId!, res)
             res.status(200).json({
                 status: 'success',
                 message: 'Successfully logged out',
@@ -72,6 +73,29 @@ export class AuthController {
             const response = await this.authService.resetPassword(
                 token,
                 newPassword,
+            )
+            res.status(200).json({
+                status: 'success',
+                data: response,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async refreshToken(req: Request, res: Response, next: NextFunction) {
+        try {
+            const refreshToken = req.cookies.refreshJwt
+            if (!refreshToken) {
+                return res.status(401).json({
+                    status: 'fail',
+                    message: 'Refresh token missing',
+                })
+            }
+
+            const response = await this.authService.refreshToken(
+                refreshToken,
+                res,
             )
             res.status(200).json({
                 status: 'success',
