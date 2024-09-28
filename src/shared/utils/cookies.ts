@@ -12,10 +12,12 @@ export function setCookieToken(res: Response, token: string): void {
 }
 
 export function clearCookieToken(res: Response): void {
-    res.cookie('jwt', 'loggedout', {
+    res.clearCookie('jwt', {
         httpOnly: true,
-        secure: process.env.NODE_ENV !== 'development',
-        sameSite: 'strict',
-        maxAge: 5 * 1000, // Expire in 5 seconds
+        secure: process.env.NODE_ENV === 'production',
+    })
+    res.clearCookie('refreshJwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
     })
 }
