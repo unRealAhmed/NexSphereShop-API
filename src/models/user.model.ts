@@ -1,13 +1,12 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
-import Order from './order.model'
 
 export interface IUser extends AbstractDocument {
     fullname: string
     email: string
     password: string
-    passwordConfirm: string
+    passwordConfirm: string | undefined
     role: 'admin' | 'user'
     active: boolean
     orders: ID[]
@@ -49,30 +48,26 @@ const userSchema = new Schema<IUser>(
         },
         passwordConfirm: {
             type: String,
-            required: true,
+            required: false,
         },
         role: {
             type: String,
             enum: ['admin', 'user'],
             default: 'user',
+            index: true,
         },
         active: {
             type: Boolean,
             default: true,
             select: false,
+            index: true,
         },
         orders: [
             {
                 type: Schema.Types.ObjectId,
-                ref: Order.name,
+                ref: 'Order',
             },
         ],
-        // wishLists: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: Wishlist.name,
-        //     },
-        // ],
         hasShippingAddress: {
             type: Boolean,
             default: false,
