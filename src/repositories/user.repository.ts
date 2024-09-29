@@ -1,3 +1,4 @@
+import { FilterQuery } from 'mongoose'
 import User, { IUser } from '../models/user.model'
 import { ID } from '../shared/types'
 import { AbstractRepository } from './abstract.repository'
@@ -12,7 +13,14 @@ export class UserRepository extends AbstractRepository<IUser> {
     }
 
     findByEmail(email: string) {
-        return this.model.findOne({ email }).select('+password').lean().exec()
+        return this.model.findOne({ email }).select('+password').exec()
+    }
+
+    findByResetToken(filter: FilterQuery<IUser>) {
+        return this.model
+            .findOne({ ...filter })
+            .select('+password')
+            .exec()
     }
 
     updatePassword(id: ID, password: string) {
