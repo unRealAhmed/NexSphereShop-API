@@ -58,6 +58,19 @@ paths:
                                         properties:
                                             user:
                                                 $ref: '#/components/schemas/UserResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid email or password
 
     /api/auth/login:
         post:
@@ -102,10 +115,26 @@ paths:
                                                 type: string
                                                 example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
                                                 description: JWT token for authentication
+                                            message:
+                                                type: string
+                                                example: User logged in successfully
+                401:
+                    description: Unauthorized - Invalid credentials
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid email or password
 
     /api/auth/logout:
         post:
-            summary: Log out a user
+            summary: Log out a user (clear cookies only)
             security:
                 - bearerAuth: []
             responses:
@@ -122,6 +151,19 @@ paths:
                                     message:
                                         type: string
                                         example: Successfully logged out
+                401:
+                    description: Unauthorized - Not logged in
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: User not logged in
 
     /api/auth/forgot-password:
         post:
@@ -201,8 +243,27 @@ paths:
                                     message:
                                         type: string
                                         example: Password successfully reset
+                400:
+                    description: Bad Request - Invalid token or passwords do not match
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid token or passwords do not match
 
 components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+
     schemas:
         UserResponse:
             type: object
