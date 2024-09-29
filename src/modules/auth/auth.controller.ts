@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import { BadRequestError } from '../../shared/errors/errors'
 import { EmailService } from '../../shared/helpers/email'
 import { welcomeHtmlTemplate } from '../../shared/utils'
 import { AuthService } from './auth.service'
@@ -54,6 +55,10 @@ export class AuthController {
     async forgotPassword(req: Request, res: Response, next: NextFunction) {
         try {
             const { email } = req.body
+            if (!email)
+                return next(
+                    new BadRequestError('please enter an email address'),
+                )
             const protocol = req.protocol
             const host = req.get('host')!
             await this.authService.forgotPassword(email, protocol, host)
@@ -69,10 +74,10 @@ export class AuthController {
     async resetPassword(req: Request, res: Response, next: NextFunction) {
         try {
             const { token } = req.params
-            const { newPassword } = req.body
+            const { password } = req.body
             const response = await this.authService.resetPassword(
                 token,
-                newPassword,
+                password,
             )
             res.status(200).json({
                 status: 'success',

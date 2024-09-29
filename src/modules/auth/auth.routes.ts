@@ -43,7 +43,6 @@ createRoute(
     router,
     'post',
     '/forgot-password',
-    validate(userSchemas.login),
     authController.forgotPassword.bind(authController),
 )
 

@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { Response } from 'express'
 import { UserRepository } from '../../repositories'
 import { RefreshTokenRepository } from '../../repositories/refreshToken.repository'
@@ -19,7 +20,12 @@ import {
     setTokensOnResponse,
     verifyRefreshToken,
 } from '../../shared/utils/token'
-import { LoginResponse, SignUpBody, SignUpResponse } from './auth.types'
+import {
+    LoginResponse,
+    ResetPasswordBody,
+    SignUpBody,
+    SignUpResponse,
+} from './auth.types'
 
 export class AuthService {
     private userRepository: UserRepository
@@ -176,17 +182,20 @@ export class AuthService {
 
     async resetPassword(
         token: string,
-        newPassword: string,
+        data: ResetPasswordBody,
     ): Promise<LoginResponse> {
-        const hashedToken = createPasswordResetToken()
-        const user = await this.userRepository.findOne({
+        const hashedToken = crypto
+            .createHash('sha256')
+            .update(token)
+            .digest('hex')
+        const user = await this.userRepository.findByResetToken({
             passwordResetToken: hashedToken,
             passwordResetExpires: { $gt: Date.now() },
         })
 
         if (!user) throw new BadRequestError('Invalid or expired token')
 
-        user.password = await hashPassword(newPassword)
+        user.password = await hashPassword(data.password)
         user.passwordResetToken = undefined
         user.passwordResetExpires = undefined
         await user.save()

@@ -16,6 +16,7 @@ export type SignUpResponse = {
 }
 
 export type SignUpBody = z.infer<typeof userSchemas.registration.body>
+export type ResetPasswordBody = z.infer<typeof userSchemas.updatePassword.body>
 
 type ResendUserData = {
     _id: ID
