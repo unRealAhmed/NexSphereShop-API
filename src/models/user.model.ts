@@ -59,7 +59,6 @@ const userSchema = new Schema<IUser>(
         active: {
             type: Boolean,
             default: true,
-            select: false,
             index: true,
         },
         orders: [
