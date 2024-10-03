@@ -1,0 +1,350 @@
+openapi: 3.0.0
+info:
+    title: Product API
+    description: API for product management (CRUD operations, apply/remove discounts)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Products
+      description: Endpoints related to product management
+
+paths:
+    /api/products:
+        post:
+            tags:
+                - Products
+            summary: Create a new product
+            requestBody:
+                description: Product creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ProductCreate'
+            responses:
+                201:
+                    description: Product successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ProductResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid product data
+
+        get:
+            tags:
+                - Products
+            summary: Get all products
+            responses:
+                200:
+                    description: List of products retrieved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/ProductResponse'
+
+    /api/products/{productId}:
+        get:
+            tags:
+                - Products
+            summary: Get a product by ID
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to retrieve
+            responses:
+                200:
+                    description: Product found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ProductResponse'
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Product not found
+
+        patch:
+            tags:
+                - Products
+            summary: Update a product's details
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to update
+            requestBody:
+                description: Data to update product details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ProductUpdate'
+            responses:
+                200:
+                    description: Product successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ProductResponse'
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Product not found
+
+        delete:
+            tags:
+                - Products
+            summary: Delete a product by ID
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to delete
+            responses:
+                204:
+                    description: Product successfully deleted
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Product not found
+
+    /api/products/{productId}/discount:
+        patch:
+            tags:
+                - Products
+            summary: Apply a discount to a product
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to apply the discount
+            requestBody:
+                description: Discount data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                discount:
+                                    type: number
+                                    example: 20
+                                    description: Discount percentage to apply
+                            required:
+                                - discount
+            responses:
+                200:
+                    description: Discount successfully applied
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ProductResponse'
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Product not found
+
+    /api/products/{productId}/discount/remove:
+        patch:
+            tags:
+                - Products
+            summary: Remove a discount from a product
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to remove the discount
+            responses:
+                200:
+                    description: Discount successfully removed
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ProductResponse'
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Product not found
+
+components:
+    schemas:
+        ProductCreate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Product Name
+                    description: Name of the product
+                description:
+                    type: string
+                    example: A brief description of the product.
+                    description: Description of the product
+                price:
+                    type: number
+                    example: 99.99
+                    description: Price of the product
+                stock:
+                    type: integer
+                    example: 100
+                    description: Quantity of the product in stock
+                discount:
+                    type: number
+                    example: 0
+                    description: Initial discount percentage
+            required:
+                - name
+                - price
+                - stock
+
+        ProductUpdate:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Updated Product Name
+                description:
+                    type: string
+                    example: Updated description of the product.
+                price:
+                    type: number
+                    example: 79.99
+                stock:
+                    type: integer
+                    example: 50
+                discount:
+                    type: number
+                    example: 0
+            required:
+                - name
+                - price
+                - stock
+
+        ProductResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                    example: Product Name
+                description:
+                    type: string
+                    example: A brief description of the product.
+                price:
+                    type: number
+                    example: 99.99
+                stock:
+                    type: integer
+                    example: 100
+                discount:
+                    type: number
+                    example: 10
