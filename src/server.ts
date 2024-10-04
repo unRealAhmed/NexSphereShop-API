@@ -40,6 +40,7 @@ const passwordResetLimiter = rateLimit({
 app.use('/api/v1/auth/forgotPassword', passwordResetLimiter)
 
 connectDatabase()
+console.log('hello');
 
 // Stripe Webhook
 // app.post('/webhook', express.raw({ type: 'application/json' }), webhookCheckout)
