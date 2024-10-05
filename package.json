@@ -10,7 +10,8 @@
         "format": "prettier --write src/.",
         "dev": "nodemon --exec ts-node src/server.ts",
         "start:build": "npm run build && npm run start",
-        "dev:watch": "nodemon"
+        "dev:watch": "nodemon",
+        "dev:full": "concurrently \"yarn build:watch\" \"yarn dev\""
     },
     "keywords": [
         "API",
@@ -59,6 +60,7 @@
         "@types/swagger-ui-express": "^4.1.6",
         "@typescript-eslint/eslint-plugin": "^5.62.0",
         "@typescript-eslint/parser": "^5.62.0",
+        "concurrently": "^9.0.1",
         "eslint": "^8.57.0",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
