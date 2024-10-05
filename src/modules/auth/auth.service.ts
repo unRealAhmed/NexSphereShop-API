@@ -74,7 +74,7 @@ export class AuthService {
             createdAt: newUser.createdAt,
             updatedAt: newUser.updatedAt,
             accessToken,
-            refreshToken,
+            // refreshToken,
         }
     }
 
@@ -103,7 +103,7 @@ export class AuthService {
 
         return {
             accessToken,
-            refreshToken,
+            // refreshToken,
             user: {
                 _id: user._id,
                 fullname: user.fullname,
@@ -150,7 +150,7 @@ export class AuthService {
 
         return {
             accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
+            // refreshToken: newRefreshToken,
             user: {
                 _id: user._id,
                 fullname: user.fullname,
@@ -204,7 +204,7 @@ export class AuthService {
 
         return {
             accessToken: jwttoken,
-            refreshToken: jwttoken,
+            // refreshToken: jwttoken,
             user: {
                 _id: user._id,
                 fullname: user.fullname,

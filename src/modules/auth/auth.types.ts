@@ -12,7 +12,7 @@ export type SignUpResponse = {
     createdAt: Date
     updatedAt: Date
     accessToken: string
-    refreshToken: string
+    // refreshToken: string
 }
 
 export type SignUpBody = z.infer<typeof userSchemas.registration.body>
@@ -29,5 +29,5 @@ type ResendUserData = {
 export type LoginResponse = {
     user: ResendUserData
     accessToken: string
-    refreshToken: string
+    // refreshToken: string
 }
