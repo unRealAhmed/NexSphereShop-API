@@ -9,9 +9,7 @@
         "clean": "rm -rf ./build || true",
         "format": "prettier --write src/.",
         "dev": "nodemon --exec ts-node src/server.ts",
-        "start:build": "npm run build && npm run start",
-        "dev:watch": "nodemon",
-        "dev:full": "concurrently \"yarn build:watch\" \"yarn dev\""
+        "start:build": "yarn build && yarn start"
     },
     "keywords": [
         "API",
