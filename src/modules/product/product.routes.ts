@@ -1,26 +1,75 @@
-// import reviewRouter from '@modules/review/reviewRoutes'
-// import { protect, restrictTo } from '@modules/user/auth.Controller'
-// import express from 'express'
+import express from 'express'
+import { extractUserFromToken } from '../../middlewares/auth'
+import { validate } from '../../middlewares/validation.middleware'
+import { createRoute } from '../../shared/helpers/routeHelper'
+import { productSchemas } from '../../validations'
+import { ProductController } from './productController'
 
-// import {
-//     createProduct,
-//     deleteProduct,
-//     // getAllProducts,
-//     // getSingleProduct,
-//     updateProduct,
-// } from './productController'
+const router = express.Router()
+const productController = new ProductController()
 
-// const router = express.Router()
+// 1. Create Product
+createRoute(
+    router,
+    'post',
+    '/',
+    extractUserFromToken,
+    validate(productSchemas.createProduct),
+    productController.createProduct.bind(productController),
+)
 
-// router.use('/:productId/reviews', reviewRouter)
+// 2. Get All Products
+createRoute(
+    router,
+    'get',
+    '/',
+    productController.getAllProducts.bind(productController),
+)
 
-// // router.get('/', getAllProducts)
-// // router.get('/:id', getSingleProduct)
+// 3. Find One Product by ID
+createRoute(
+    router,
+    'get',
+    '/:productId',
+    validate(productSchemas.findProductById),
+    productController.getProduct.bind(productController),
+)
 
-// router.use(protect, restrictTo('admin'))
+// 4. Update Product
+createRoute(
+    router,
+    'patch',
+    '/:productId',
+    extractUserFromToken,
+    validate(productSchemas.updateProduct),
+    productController.updateProduct.bind(productController),
+)
 
-// router.post('/', createProduct)
+// 5. Delete Product
+createRoute(
+    router,
+    'delete',
+    '/:productId',
+    extractUserFromToken,
+    productController.deleteProduct.bind(productController),
+)
 
-// router.route('/:id').patch(updateProduct).delete(deleteProduct)
+createRoute(
+    router,
+    'patch',
+    '/:productId/discount',
+    extractUserFromToken,
+    validate(productSchemas.applyDiscount),
+    productController.applyDiscount.bind(productController),
+)
 
-// export default router
+// 7. Remove Discount from Product
+createRoute(
+    router,
+    'patch',
+    '/:productId/discount/remove',
+    extractUserFromToken,
+    productController.removeDiscount.bind(productController),
+)
+
+export default router
