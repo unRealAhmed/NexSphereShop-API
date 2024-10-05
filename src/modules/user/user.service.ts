@@ -3,6 +3,14 @@ import { UserRepository } from '../../repositories'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import * as passwordService from '../../shared/helpers/password'
 import { ID } from '../../shared/types'
+import {
+    CreateUserDTO,
+    UpdateUserDTO,
+    UpdateCurrentUserDTO,
+    ChangePasswordDTO,
+    UpdateShippingAddressDTO,
+    AssignRoleDTO
+} from './user.dtos'
 
 export class UserService {
     private userRepository: UserRepository
@@ -11,45 +19,95 @@ export class UserService {
         this.userRepository = new UserRepository()
     }
 
-    // we need to define dto for update current user without password
-    async updateCurrentUser(userId: ID, data: Partial<IUser>) {
+    async createUser(data: CreateUserDTO): Promise<IUser> {
+        const { email, password, passwordConfirm } = data
+        if (!email || !password || password !== passwordConfirm) {
+            throw new BadRequestError('Invalid user data or password mismatch')
+        }
+
+        const existingUser = await this.userRepository.findByEmail(email)
+        if (existingUser) {
+            throw new BadRequestError('Email is already in use')
+        }
+
+        const hashedPassword = await passwordService.hashPassword(password)
+        const userData = { ...data, password: hashedPassword, active: true }
+
+        return this.userRepository.create(userData)
+    }
+
+    async findAllUsers(filter: any): Promise<IUser[]> {
+        return this.userRepository.findAll({ ...filter })
+    }
+
+    async findAllAdmins(): Promise<IUser[]> {
+        return this.userRepository.findAll({
+            filter: { role: 'admin' }
+        })
+    }
+
+    async findById(userId: ID): Promise<IUser> {
+        const user = await this.userRepository.findById(userId)
+        if (!user) throw new NotFoundError('User not found')
+        return user
+    }
+
+    async updateUser(userId: ID, data: UpdateUserDTO): Promise<IUser> {
         const updatedUser = await this.userRepository.updateById(userId, data)
-        if (!updatedUser) throw new BadRequestError('')
+        if (!updatedUser) throw new NotFoundError('User not found')
         return updatedUser
     }
 
-    //we need dto for change password
-    async changePassword(
-        userId: ID,
-        oldPassword: string,
-        newPassword: string,
-    ): Promise<IUser> {
+    async getMe(userId: ID): Promise<IUser> {
+        const user = await this.userRepository.findById(userId)
+        if (!user) throw new NotFoundError('User not found')
+        return user
+    }
+
+    async deleteUser(userId: ID): Promise<void> {
+        const deletedUser = await this.userRepository.deleteById(userId)
+        if (!deletedUser) throw new NotFoundError('User not found')
+    }
+
+    async assignRole(userId: ID, role: AssignRoleDTO['role']): Promise<IUser> {
+        const updatedUser = await this.userRepository.updateById(userId, { role })
+        if (!updatedUser) throw new NotFoundError('User not found')
+        return updatedUser
+    }
+
+    async updateCurrentUser(userId: ID, data: UpdateCurrentUserDTO): Promise<IUser> {
+        const updatedUser = await this.userRepository.updateById(userId, data)
+        if (!updatedUser) throw new BadRequestError('Failed to update user')
+        return updatedUser
+    }
+
+    async changePassword(userId: ID, data: ChangePasswordDTO): Promise<IUser> {
+        const { oldPassword, newPassword, passwordConfirm } = data
         const user = await this.userRepository.findById(userId)
         if (!user) throw new NotFoundError('User not found')
 
-        const isPasswordCorrect = passwordService.comparePassword(
-            oldPassword,
-            user.password,
-        )
+        if (newPassword !== passwordConfirm) {
+            throw new BadRequestError('New passwords must match')
+        }
+
+        const isPasswordCorrect = passwordService.comparePassword(oldPassword, user.password)
         if (!isPasswordCorrect) throw new BadRequestError('Incorrect password')
 
         const hashedPassword = await passwordService.hashPassword(newPassword)
         return this.userRepository.updatePassword(userId, hashedPassword)
     }
 
-    // Update user shipping address
-    async updateShippingAddress(
-        userId: ID,
-        address: IUser['shippingAddress'],
-    ): Promise<IUser> {
+    async updateShippingAddress(userId: ID, data: UpdateShippingAddressDTO): Promise<IUser> {
+        const { shippingAddress } = data
         return this.userRepository.updateById(userId, {
-            shippingAddress: address,
+            shippingAddress,
             hasShippingAddress: true,
         })
     }
 
-    // Find user by email
-    async findByEmail(email: string): Promise<IUser | null> {
-        return this.userRepository.findByEmail(email)
+    async findByEmail(email: string): Promise<IUser> {
+        const user = await this.userRepository.findByEmail(email)
+        if (!user) throw new NotFoundError('user not found')
+        return user
     }
 }
