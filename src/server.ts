@@ -3,7 +3,6 @@ import dotenv from 'dotenv'
 import express from 'express'
 import mongoSanitize from 'express-mongo-sanitize'
 import rateLimit from 'express-rate-limit'
-import helmet from 'helmet'
 import hpp from 'hpp'
 import morgan from 'morgan'
 import connectDatabase from './config/dataBase'
@@ -15,7 +14,6 @@ dotenv.config()
 
 const app = express()
 app.use(express.json())
-app.use(helmet())
 cors(app)
 serializer(app)
 app.use(morgan('tiny'))

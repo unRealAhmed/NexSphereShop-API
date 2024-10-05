@@ -11,26 +11,10 @@ module.exports = {
         'prettier',
     ],
     rules: {
-        'prettier/prettier': 1,
-        'require-jsdoc': [0],
-        'new-cap': [0],
-        camelcase: [0],
-        'no-unused-vars': [
-            'warn',
-            {
-                vars: 'all',
-                args: 'after-used',
-                ignoreRestSiblings: false,
-            },
-        ],
-        '@typescript-eslint/no-unused-vars': [
-            'warn',
-            {
-                vars: 'all',
-                args: 'after-used',
-                ignoreRestSiblings: false,
-            },
-        ],
+        '@typescript-eslint/interface-name-prefix': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
     },
 }
