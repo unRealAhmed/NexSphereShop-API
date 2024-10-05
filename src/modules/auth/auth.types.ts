@@ -13,7 +13,7 @@ export type SignUpResponse = {
     // refreshToken: string
 }
 
-type ResendUserData = {
+type UserData = {
     _id: ID
     fullname: string
     role: string
@@ -22,7 +22,7 @@ type ResendUserData = {
 }
 
 export type LoginResponse = {
-    user: ResendUserData
+    user: UserData
     accessToken: string
     // refreshToken: string
 }
