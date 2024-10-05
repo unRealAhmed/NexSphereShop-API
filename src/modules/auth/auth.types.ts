@@ -1,6 +1,4 @@
-import { z } from 'zod'
 import { ID } from '../../shared/types'
-import { userSchemas } from '../../validations'
 
 export type SignUpResponse = {
     _id: ID
@@ -14,9 +12,6 @@ export type SignUpResponse = {
     accessToken: string
     // refreshToken: string
 }
-
-export type SignUpBody = z.infer<typeof userSchemas.registration.body>
-export type ResetPasswordBody = z.infer<typeof userSchemas.updatePassword.body>
 
 type ResendUserData = {
     _id: ID
