@@ -22,10 +22,9 @@ import {
 } from '../../shared/utils/token'
 import {
     LoginResponse,
-    ResetPasswordBody,
-    SignUpBody,
     SignUpResponse,
 } from './auth.types'
+import { SignUpBody, ResetPasswordBody } from './auth.dtos'
 
 export class AuthService {
     private userRepository: UserRepository
@@ -195,7 +194,7 @@ export class AuthService {
 
         if (!user) throw new BadRequestError('Invalid or expired token')
 
-        user.password = await hashPassword(data.password)
+        user.password = await hashPassword(data.newPassword)
         user.passwordResetToken = undefined
         user.passwordResetExpires = undefined
         await user.save()
