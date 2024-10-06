@@ -1,6 +1,6 @@
 import { debug } from 'console'
 import dotenv from 'dotenv'
-import express from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import mongoSanitize from 'express-mongo-sanitize'
 import rateLimit from 'express-rate-limit'
 import hpp from 'hpp'
@@ -43,6 +43,14 @@ connectDatabase()
 
 const port = Number(process.env.PORT) || 8000
 routers(app, port)
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.all('*', (req: Request, res: Response, next: NextFunction) => {
+    res.status(404).json({
+        status: 'fail',
+        message: `Can't find ${req.originalUrl} on this server!`,
+    })
+})
 
 app.use(globalErrorHandler)
 
