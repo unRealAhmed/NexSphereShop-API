@@ -1,145 +1,127 @@
-// import Product from '@models/product.model'
-// import AppError from '@shared/utils/appErrors'
-// import asyncHandler from '@shared/utils/asyncHandler'
-// // import { getAll, getOne } from 'resourceController.ts'
-// // eslint-disable-next-line no-unused-vars
-// import Brand from '@models/brand.model'
-// import Category from '@models/category.model'
+import { NextFunction, Request, Response } from 'express'
+import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
+import { ProductService } from './product.service'
 
-// const productType = 'product'
-// // export const getAllProducts = getAll(Product)
-// // export const getSingleProduct = getOne(Product, productType)
+export class ProductController {
+    private productService: ProductService
 
-// export const createProduct = asyncHandler(async (req, res, next) => {
-//     const {
-//         name,
-//         description,
-//         category,
-//         sizes,
-//         colors,
-//         price,
-//         totalQty,
-//         brand,
-//     } = req.body
-//     const userId = req.user.id
-//     // const convertedImgs = req.files.map((file) => file?.path);
+    constructor() {
+        this.productService = new ProductService()
+    }
 
-//     // Check if the product already exists
-//     const productExists = await Product.findOne({ name })
-//     if (productExists) {
-//         return next(new AppError('Product Already Exists', 400))
-//     }
+    async createProduct(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId
+            const productData = req.body
 
-//     // Find or create the brand
-//     const brandFound = await Brand.findOne({ name: brand })
-//     if (!brandFound) {
-//         return next(
-//             new AppError(
-//                 'Brand not found, please create brand first or check brand name',
-//                 400,
-//             ),
-//         )
-//     }
+            const product = await this.productService.createProduct(
+                productData,
+                userId!,
+            )
+            return res.status(201).json({
+                status: 'success',
+                data: product,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     // Find or create the category
-//     const categoryFound = await Category.findOne({ name: category })
-//     if (!categoryFound) {
-//         return next(
-//             new AppError(
-//                 'Category not found, please create category or check category name',
-//                 400,
-//             ),
-//         )
-//     }
-//     // Create th  e product
-//     const product = await Product.create({
-//         name,
-//         description,
-//         category,
-//         sizes,
-//         colors,
-//         user: userId,
-//         price,
-//         totalQty,
-//         brand,
-//     })
-//     // images: convertedImgs,
-//     // Update category with the new product
-//     categoryFound?.products?.push(product._id)
-//     await categoryFound.save()
+    async getAllProducts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const products = await this.productService.getAllProducts(req.query)
+            return res.status(200).json({
+                status: 'success',
+                data: products,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     // Update brand with the new product
-//     brandFound?.products?.push(product._id)
-//     await brandFound.save()
+    async getProduct(req: Request, res: Response, next: NextFunction) {
+        try {
+            const productId = req.params.id
+            const product = await this.productService.getProduct(
+                convertToObjectId(productId),
+            )
 
-//     // Send response
-//     res.json({
-//         status: 'success',
-//         message: 'Product created successfully',
-//         product,
-//     })
-// })
+            if (!product) {
+                return res.status(404).json({
+                    status: 'error',
+                    message: 'Product not found.',
+                })
+            }
 
-// export const updateProduct = asyncHandler(async (req, res, next) => {
-//     const {
-//         name,
-//         description,
-//         category,
-//         sizes,
-//         colors,
-//         user,
-//         price,
-//         totalQty,
-//         brand,
-//     } = req.body
+            return res.status(200).json({
+                status: 'success',
+                data: product,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     const product = await Product.findByIdAndUpdate(
-//         req.params.id,
-//         {
-//             name,
-//             description,
-//             category,
-//             sizes,
-//             colors,
-//             user,
-//             price,
-//             totalQty,
-//             brand,
-//         },
-//         {
-//             new: true,
-//             runValidators: true,
-//         },
-//     )
-//     if (!product) {
-//         return next(new AppError('Product not found', 404))
-//     }
-//     res.json({
-//         status: 'success',
-//         message: 'Product updated successfully',
-//         product,
-//     })
-// })
+    async updateProduct(req: Request, res: Response, next: NextFunction) {
+        try {
+            const productId = req.params.id
+            const productData = req.body
 
-// export const deleteProduct = asyncHandler(async (req, res, next) => {
-//     const productId = req.params.id
+            const updatedProduct = await this.productService.updateProduct(
+                convertToObjectId(productId),
+                productData,
+            )
+            return res.status(200).json({
+                status: 'success',
+                data: updatedProduct,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     // Find the product by ID
-//     const product = await Product.findById(productId)
+    async deleteProduct(req: Request, res: Response, next: NextFunction) {
+        try {
+            const productId = req.params.id
+            await this.productService.deleteProduct(
+                convertToObjectId(productId),
+            )
+            return res.status(204).send()
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     // Check if the product exists
-//     if (!product) {
-//         return next(new AppError('Product not found', 404))
-//     }
+    async applyDiscount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const productId = req.params.id
+            const { discount } = req.body
 
-//     // Delete all reviews associated with the product
-//     // await Review.deleteMany({ product: productId });
+            const updatedProduct = await this.productService.applyDiscount(
+                convertToObjectId(productId),
+                discount,
+            )
+            return res.status(200).json({
+                status: 'success',
+                data: updatedProduct,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     // Delete the product
-//     await Product.deleteOne({ _id: productId })
-
-//     res.status(204).json({
-//         status: 'success',
-//         data: null,
-//     })
-// })
+    async removeDiscount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const productId = req.params.id
+            const updatedProduct = await this.productService.removeDiscount(
+                convertToObjectId(productId),
+            )
+            return res.status(200).json({
+                status: 'success',
+                data: updatedProduct,
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+}
