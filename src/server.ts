@@ -19,7 +19,6 @@ serializer(app)
 app.use(morgan('tiny'))
 app.use(mongoSanitize())
 app.use(hpp())
-// app.use(express.static('public'))
 app.use(
     '/api',
     rateLimit({
@@ -41,16 +40,6 @@ connectDatabase()
 
 // Stripe Webhook
 // app.post('/webhook', express.raw({ type: 'application/json' }), webhookCheckout)
-
-// app.all('*', (req, _, next) => {
-//     const err = new Error(`Can't find ${req.originalUrl}`)
-//     // err.status = 'fail'
-//     // err.statusCode = 404
-//     // err.isOperational = true
-//     next(err)
-// })
-
-// app.use(errorController)
 
 const port = Number(process.env.PORT) || 8000
 routers(app, port)
