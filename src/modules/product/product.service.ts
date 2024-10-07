@@ -1,25 +1,30 @@
 import { IProduct } from '../../models'
-import Brand from '../../models/brand.model'
-import Category from '../../models/category.model'
-import { ProductRepository } from '../../repositories'
+import {
+    BrandRepository,
+    CategoryRepository,
+    ProductRepository,
+} from '../../repositories'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
+import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
 import { ID } from '../../shared/types'
+import { CreateProductDTO, UpdateProductDTO } from './product.dtos'
 
 export class ProductService {
-    private productRepository: ProductRepository
+    private readonly productRepository: ProductRepository
+    private readonly brandRepository: BrandRepository
+    private readonly categoryRepository: CategoryRepository
 
     constructor() {
         this.productRepository = new ProductRepository()
+        this.brandRepository = new BrandRepository()
+        this.categoryRepository = new CategoryRepository()
     }
 
     private calculateQtyLeft(product: IProduct): number {
         return product.totalQuantity - product.totalSoldQuantity
     }
 
-    async createProduct(
-        data: Partial<IProduct>,
-        userId: ID,
-    ): Promise<IProduct> {
+    async createProduct(data: CreateProductDTO, userId: ID): Promise<IProduct> {
         const { name, category, brand } = data
 
         const existingProduct = await this.productRepository.exists({ name })
@@ -27,19 +32,25 @@ export class ProductService {
             throw new BadRequestError('Product already exists')
         }
 
-        const brandFound = await Brand.findById(brand)
+        const brandFound = await this.brandRepository.findById(
+            convertToObjectId(brand),
+        )
         if (!brandFound) {
             throw new BadRequestError('Brand not found')
         }
 
-        const categoryFound = await Category.findById(category)
+        const categoryFound = await this.categoryRepository.findById(
+            convertToObjectId(category),
+        )
         if (!categoryFound) {
             throw new BadRequestError('Category not found')
         }
 
         const product = await this.productRepository.create({
             ...data,
-            user: userId,
+            category: convertToObjectId(category),
+            brand: convertToObjectId(brand),
+            createdBy: userId,
         })
 
         categoryFound.products?.push(product._id)
@@ -50,9 +61,8 @@ export class ProductService {
         return product
     }
 
-    async getAllProducts(): Promise<IProduct[]> {
-        const products = await this.productRepository.findAll()
-        return products
+    async getAllProducts(filter: any): Promise<IProduct[]> {
+        return this.productRepository.findAll({ ...filter })
     }
 
     async getProduct(productId: ID): Promise<IProduct & { qtyLeft: number }> {
@@ -69,8 +79,26 @@ export class ProductService {
 
     async updateProduct(
         productId: ID,
-        data: Partial<IProduct>,
+        data: UpdateProductDTO,
     ): Promise<IProduct> {
+        if (data.brand) {
+            const brandFound = await this.brandRepository.findById(
+                convertToObjectId(data.brand),
+            )
+            if (!brandFound) {
+                throw new BadRequestError('Brand not found')
+            }
+        }
+
+        if (data.category) {
+            const categoryFound = await this.categoryRepository.findById(
+                convertToObjectId(data.category),
+            )
+            if (!categoryFound) {
+                throw new BadRequestError('Category not found')
+            }
+        }
+
         const product = await this.productRepository.updateById(productId, data)
         if (!product) {
             throw new NotFoundError('Product not found')
