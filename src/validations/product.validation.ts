@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ProductStatusValues } from '../shared/types/product.status'
 import { IDSchema } from './id.schema'
 
 // ----------------------
@@ -37,6 +38,13 @@ const discountSchema = z
     .nonnegative({ message: 'Discount must be a non-negative number.' })
     .optional()
 
+const applyDiscountSchema = z.object({
+    discount: z
+        .number()
+        .nonnegative()
+        .max(100, 'Discount must not exceed 100%'),
+})
+
 const lowStockThresholdSchema = z
     .number()
     .nonnegative({
@@ -44,7 +52,7 @@ const lowStockThresholdSchema = z
     })
     .optional()
 
-const statusSchema = z.enum(['ACTIVE', 'DISCONTINUED'])
+const statusSchema = z.enum(ProductStatusValues)
 
 // ----------------------
 // Specific Schemas
@@ -91,11 +99,14 @@ export const productSchemas = {
     updateProduct: {
         body: updateProductSchema,
     },
-    findAllProducts: {
-        query: z.object({
-            // Add any query parameters you need to validate
-        }),
+    applyDiscount: {
+        body: applyDiscountSchema,
     },
+    // findAllProducts: {
+    //     query: z.object({
+    //         // Add any query parameters you need to validate
+    //     }),
+    // },
     findProductById: {
         params: z.object({
             id: IDSchema,
