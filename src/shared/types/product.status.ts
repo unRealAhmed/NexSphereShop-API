@@ -7,4 +7,6 @@ export const ProductStatusEnum = {
 export type ProductStatusType =
     (typeof ProductStatusEnum)[keyof typeof ProductStatusEnum]
 
-export const ProductStatusValues = Object.values(ProductStatusEnum)
+export const ProductStatusValues = Object.values(ProductStatusEnum) as [
+    ProductStatusType,
+]
