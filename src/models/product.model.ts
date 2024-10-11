@@ -19,8 +19,7 @@ export interface IProduct extends AbstractDocument {
     colors: string[]
     averageRating: number
     feedbacks: number
-    user: ID
-    images: string[]
+    images?: string[]
     price: number
     originalPrice: number
     totalQuantity: number
@@ -54,9 +53,8 @@ const productSchema = new Schema<IProduct>(
             set: (val: number) => +val.toFixed(1),
         },
         feedbacks: { type: Number, default: 0 },
-        user: { type: Schema.Types.ObjectId, ref: User.name, required: true },
         images: [
-            { type: String, required: true, default: '/uploads/example.jpeg' },
+            { type: String, required: false, default: '/uploads/example.jpeg' },
         ],
         price: { type: Number, required: true },
         originalPrice: { type: Number, required: true },
