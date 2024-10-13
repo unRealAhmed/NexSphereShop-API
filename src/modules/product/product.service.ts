@@ -22,19 +22,16 @@ export class ProductService {
     ): Promise<IProduct> {
         const { name, category, brand } = data
 
-        // Check if the product already exists
         const existingProduct = await this.productRepository.exists({ name })
         if (existingProduct) {
             throw new BadRequestError('Product already exists')
         }
 
-        // Ensure brand exists
         const brandFound = await Brand.findById(brand)
         if (!brandFound) {
             throw new BadRequestError('Brand not found')
         }
 
-        // Ensure category exists
         const categoryFound = await Category.findById(category)
         if (!categoryFound) {
             throw new BadRequestError('Category not found')
@@ -45,7 +42,6 @@ export class ProductService {
             user: userId,
         })
 
-        // Update related Brand and Category
         categoryFound.products?.push(product._id)
         brandFound.products?.push(product._id)
         await categoryFound.save()
@@ -90,5 +86,43 @@ export class ProductService {
         }
 
         await this.productRepository.deleteById(productId)
+    }
+
+    async notifyLowStock(): Promise<void> {
+        // Placeholder for future implementation
+    }
+
+    async applyDiscount(productId: ID, discount: number): Promise<IProduct> {
+        const product = await this.productRepository.findById(productId)
+        if (!product) {
+            throw new NotFoundError('Product not found')
+        }
+
+        if (!product.originalPrice) {
+            product.originalPrice = product.price
+        }
+
+        product.price -= discount
+        product.discount = discount
+        await product.save()
+
+        return product
+    }
+
+    async removeDiscount(productId: ID): Promise<IProduct> {
+        const product = await this.productRepository.findById(productId)
+        if (!product) {
+            throw new NotFoundError('Product not found')
+        }
+
+        product.price = product.originalPrice
+        product.discount = 0
+        await product.save()
+
+        return product
+    }
+
+    async getLowStockProducts(threshold: number): Promise<IProduct[]> {
+        return this.productRepository.findLowStock(threshold)
     }
 }
