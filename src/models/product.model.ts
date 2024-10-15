@@ -22,6 +22,7 @@ export interface IProduct extends AbstractDocument {
     user: ID
     images: string[]
     price: number
+    originalPrice: number
     totalQuantity: number
     totalSoldQuantity: number
     discount?: number
@@ -58,6 +59,7 @@ const productSchema = new Schema<IProduct>(
             { type: String, required: true, default: '/uploads/example.jpeg' },
         ],
         price: { type: Number, required: true },
+        originalPrice: { type: Number, required: true },
         totalQuantity: { type: Number, required: true },
         totalSoldQuantity: { type: Number, default: 0 },
         discount: { type: Number, default: 0 },
