@@ -1,5 +1,10 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
+import {
+    ProductStatusEnum,
+    ProductStatusType,
+    ProductStatusValues,
+} from '../shared/types/product.status'
 import { AbstractDocument } from './abstract.model'
 import Brand from './brand.model'
 import Category from './category.model'
@@ -19,6 +24,11 @@ export interface IProduct extends AbstractDocument {
     price: number
     totalQuantity: number
     totalSoldQuantity: number
+    discount?: number
+    lowStockThreshold?: number
+    status: ProductStatusType
+    createdBy: ID
+    updatedBy: ID
 }
 
 const productSchema = new Schema<IProduct>(
@@ -50,6 +60,23 @@ const productSchema = new Schema<IProduct>(
         price: { type: Number, required: true },
         totalQuantity: { type: Number, required: true },
         totalSoldQuantity: { type: Number, default: 0 },
+        discount: { type: Number, default: 0 },
+        lowStockThreshold: { type: Number },
+        status: {
+            type: String,
+            enum: ProductStatusValues,
+            default: ProductStatusEnum.AVAILABLE,
+        },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: User.name,
+            required: false,
+        },
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: User.name,
+            required: false,
+        },
     },
     { timestamps: true },
 )
