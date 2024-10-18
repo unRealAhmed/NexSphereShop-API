@@ -1,6 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose'
 import { ID } from '../shared/types'
-import { RolesEnum, RolesType } from '../shared/types/roles'
+import { RolesEnum, RolesType, RolesTypeValues } from '../shared/types/roles'
 import { AbstractDocument } from './abstract.model'
 import Order from './order.model'
 
@@ -54,7 +54,7 @@ const userSchema = new Schema<IUser>(
         },
         role: {
             type: String,
-            enum: RolesEnum,
+            enum: RolesTypeValues,
             default: RolesEnum.USER,
             index: true,
         },
