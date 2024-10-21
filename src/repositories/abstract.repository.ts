@@ -9,7 +9,6 @@ import { InternalServerError } from '../shared/errors/errors'
 import { ID } from '../shared/types'
 
 export abstract class AbstractRepository<TDocument> {
-    // eslint-disable-next-line no-unused-vars
     protected constructor(protected readonly model: Model<TDocument>) {}
 
     async create(document: Partial<TDocument>): Promise<TDocument> {
