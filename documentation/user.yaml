@@ -12,7 +12,7 @@ tags:
       description: Endpoints related to user management
 
 paths:
-    /api/users/create:
+    /api/users:
         post:
             tags:
                 - Users
@@ -27,11 +27,11 @@ paths:
                             properties:
                                 fullname:
                                     type: string
-                                    example: John Doe
+                                    example: ahmed sayed
                                     description: Full name of the user
                                 email:
                                     type: string
-                                    example: john@example.com
+                                    example: ahmed.sayed@example.com
                                     description: Email of the user
                                 password:
                                     type: string
@@ -83,23 +83,10 @@ paths:
                                         type: string
                                         example: Invalid email or password
 
-    /api/users:
         get:
             tags:
                 - Users
             summary: Get all users
-            parameters:
-                - in: query
-                  name: role
-                  schema:
-                      type: string
-                      enum: ['admin', 'user']
-                  description: Filter users by role
-                - in: query
-                  name: email
-                  schema:
-                      type: string
-                  description: Filter users by email
             responses:
                 200:
                     description: List of users retrieved
@@ -127,7 +114,6 @@ paths:
                   required: true
                   schema:
                       type: string
-                      example: 60f8f5e2c2e4de001fa6f123
                   description: ID of the user to retrieve
             responses:
                 200:
@@ -160,6 +146,13 @@ paths:
             tags:
                 - Users
             summary: Update a user's details
+            parameters:
+                - in: path
+                  name: userId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the user to retrieve
             requestBody:
                 description: Data to update user details
                 required: true
@@ -204,7 +197,6 @@ paths:
                   required: true
                   schema:
                       type: string
-                      example: 60f8f5e2c2e4de001fa6f123
                   description: ID of the user to delete
             responses:
                 204:
@@ -356,13 +348,12 @@ components:
             properties:
                 id:
                     type: string
-                    example: 60f8f5e2c2e4de001fa6f123
                 fullname:
                     type: string
-                    example: John Doe
+                    example: ahmed sayed
                 email:
                     type: string
-                    example: john@example.com
+                    example: ahmed.sayed@example.com
                 role:
                     type: string
                     enum: ['admin', 'user']
@@ -403,9 +394,9 @@ components:
             properties:
                 fullname:
                     type: string
-                    example: John Doe
+                    example: ahmed sayed
                 email:
                     type: string
-                    example: john@example.com
+                    example: ahmed.sayed@example.com
                 shippingAddress:
                     $ref: '#/components/schemas/UserResponse/properties/shippingAddress'

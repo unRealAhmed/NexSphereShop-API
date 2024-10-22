@@ -27,11 +27,11 @@ paths:
                             properties:
                                 fullname:
                                     type: string
-                                    example: John Doe
+                                    example: ahmed sayed
                                     description: Full name of the user
                                 email:
                                     type: string
-                                    example: john@example.com
+                                    example: ahmed.sayed@example.com
                                     description: Email of the user
                                 password:
                                     type: string
@@ -93,7 +93,7 @@ paths:
                             properties:
                                 email:
                                     type: string
-                                    example: john@example.com
+                                    example: ahmed.sayed@example.com
                                     description: Email of the user
                                 password:
                                     type: string
@@ -190,7 +190,7 @@ paths:
                             properties:
                                 email:
                                     type: string
-                                    example: john@example.com
+                                    example: ahmed.sayed@example.com
                                     description: Email of the user
                             required:
                                 - email
@@ -287,10 +287,10 @@ components:
                     example: 60f8f5e2c2e4de001fa6f123
                 fullname:
                     type: string
-                    example: John Doe
+                    example: ahmed sayed
                 email:
                     type: string
-                    example: john@example.com
+                    example: ahmed.sayed@example.com
                 role:
                     type: string
                     enum: ['admin', 'user']
