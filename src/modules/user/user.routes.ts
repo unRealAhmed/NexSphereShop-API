@@ -12,7 +12,7 @@ const userController = new UserController()
 createRoute(
     router,
     'post',
-    '/create',
+    '/',
     validate(userSchemas.registration),
     userController.createUser.bind(userController),
 )
@@ -21,7 +21,7 @@ createRoute(
 createRoute(
     router,
     'get',
-    '/users',
+    '/',
     userController.findAllUsers.bind(userController),
 )
 
