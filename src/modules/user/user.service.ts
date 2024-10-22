@@ -4,12 +4,12 @@ import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import * as passwordService from '../../shared/helpers/password'
 import { ID } from '../../shared/types'
 import {
-    CreateUserDTO,
-    UpdateUserDTO,
-    UpdateCurrentUserDTO,
+    AssignRoleDTO,
     ChangePasswordDTO,
+    CreateUserDTO,
+    UpdateCurrentUserDTO,
     UpdateShippingAddressDTO,
-    AssignRoleDTO
+    UpdateUserDTO,
 } from './user.dtos'
 
 export class UserService {
@@ -20,10 +20,7 @@ export class UserService {
     }
 
     async createUser(data: CreateUserDTO): Promise<IUser> {
-        const { email, password, passwordConfirm } = data
-        if (!email || !password || password !== passwordConfirm) {
-            throw new BadRequestError('Invalid user data or password mismatch')
-        }
+        const { email, password } = data
 
         const existingUser = await this.userRepository.findByEmail(email)
         if (existingUser) {
@@ -42,7 +39,7 @@ export class UserService {
 
     async findAllAdmins(): Promise<IUser[]> {
         return this.userRepository.findAll({
-            filter: { role: 'admin' }
+            filter: { role: 'admin' },
         })
     }
 
@@ -70,12 +67,17 @@ export class UserService {
     }
 
     async assignRole(userId: ID, role: AssignRoleDTO['role']): Promise<IUser> {
-        const updatedUser = await this.userRepository.updateById(userId, { role })
+        const updatedUser = await this.userRepository.updateById(userId, {
+            role,
+        })
         if (!updatedUser) throw new NotFoundError('User not found')
         return updatedUser
     }
 
-    async updateCurrentUser(userId: ID, data: UpdateCurrentUserDTO): Promise<IUser> {
+    async updateCurrentUser(
+        userId: ID,
+        data: UpdateCurrentUserDTO,
+    ): Promise<IUser> {
         const updatedUser = await this.userRepository.updateById(userId, data)
         if (!updatedUser) throw new BadRequestError('Failed to update user')
         return updatedUser
@@ -90,14 +92,20 @@ export class UserService {
             throw new BadRequestError('New passwords must match')
         }
 
-        const isPasswordCorrect = passwordService.comparePassword(oldPassword, user.password)
+        const isPasswordCorrect = passwordService.comparePassword(
+            oldPassword,
+            user.password,
+        )
         if (!isPasswordCorrect) throw new BadRequestError('Incorrect password')
 
         const hashedPassword = await passwordService.hashPassword(newPassword)
         return this.userRepository.updatePassword(userId, hashedPassword)
     }
 
-    async updateShippingAddress(userId: ID, data: UpdateShippingAddressDTO): Promise<IUser> {
+    async updateShippingAddress(
+        userId: ID,
+        data: UpdateShippingAddressDTO,
+    ): Promise<IUser> {
         const { shippingAddress } = data
         return this.userRepository.updateById(userId, {
             shippingAddress,
