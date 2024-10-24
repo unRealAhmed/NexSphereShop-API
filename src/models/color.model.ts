@@ -5,7 +5,8 @@ import User from './user.model'
 
 export interface IColor extends AbstractDocument {
     name: string
-    user: ID
+    hexCode: string
+    createdBy: ID
 }
 
 const colorSchema = new Schema<IColor>(
@@ -13,8 +14,13 @@ const colorSchema = new Schema<IColor>(
         name: {
             type: String,
             required: true,
+            unique: true,
         },
-        user: {
+        hexCode: {
+            type: String,
+            required: true,
+        },
+        createdBy: {
             type: Schema.Types.ObjectId,
             ref: User.name,
             required: true,
