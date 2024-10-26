@@ -28,7 +28,6 @@ const createCouponSchema = z.object({
     startDate: isoDateSchema('Start date'),
     endDate: isoDateSchema('End date'),
     discount: discountSchema,
-    createdBy: IDSchema,
 })
 
 const updateCouponSchema = z.object({
