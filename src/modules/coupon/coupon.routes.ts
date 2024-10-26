@@ -58,18 +58,18 @@ createRoute(
 createRoute(
     router,
     'post',
-    '/apply',
+    '/apply/:code',
     validate(couponSchemas.applyCoupon),
     couponController.applyCoupon.bind(couponController),
 )
 
 // 7. Deactivate Expired Coupons
-createRoute(
-    router,
-    'patch',
-    '/deactivate-expired',
-    extractUserFromToken,
-    couponController.deactivateExpiredCoupons.bind(couponController),
-)
+// createRoute(
+//     router,
+//     'patch',
+//     '/deactivate-expired',
+//     extractUserFromToken,
+//     couponController.deactivateExpiredCoupons.bind(couponController),
+// )
 
 export default router
