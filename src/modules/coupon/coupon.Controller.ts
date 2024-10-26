@@ -68,8 +68,8 @@ export class CouponController {
 
     async applyCoupon(req: Request, res: Response, next: NextFunction) {
         try {
-            const { code } = req.body
-            const coupon = await this.couponService.applyCoupon(code)
+            const { code } = req.params
+            const coupon = await this.couponService.applyCoupon({ code })
             return res.status(200).json(coupon)
         } catch (error) {
             next(error)
