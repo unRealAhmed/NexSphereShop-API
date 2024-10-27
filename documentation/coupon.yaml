@@ -1,0 +1,247 @@
+openapi: 3.0.0
+info:
+    title: Coupon API
+    description: API for managing coupons (creation, update, retrieval, deletion, and application)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Coupons
+      description: Endpoints related to coupon management
+
+paths:
+    /api/coupons:
+        post:
+            tags:
+                - Coupons
+            summary: Create a new coupon
+            requestBody:
+                description: Coupon creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CouponCreate'
+            responses:
+                201:
+                    description: Coupon successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/CouponResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid coupon data
+
+        get:
+            tags:
+                - Coupons
+            summary: Get all coupons
+            responses:
+                200:
+                    description: List of all coupons
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/CouponResponse'
+
+    /api/coupons/{couponId}:
+        get:
+            tags:
+                - Coupons
+            summary: Get a coupon by ID
+            parameters:
+                - in: path
+                  name: couponId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the coupon to retrieve
+            responses:
+                200:
+                    description: Coupon details
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/CouponResponse'
+                404:
+                    description: Coupon not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Coupon not found
+
+        patch:
+            tags:
+                - Coupons
+            summary: Update a coupon
+            parameters:
+                - in: path
+                  name: couponId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the coupon to update
+            requestBody:
+                description: Data to update the coupon
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CouponUpdate'
+            responses:
+                200:
+                    description: Coupon successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/CouponResponse'
+                404:
+                    description: Coupon not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Coupon not found
+
+        delete:
+            tags:
+                - Coupons
+            summary: Delete a coupon
+            parameters:
+                - in: path
+                  name: couponId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the coupon to delete
+            responses:
+                204:
+                    description: Coupon successfully deleted
+                404:
+                    description: Coupon not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Coupon not found
+
+components:
+    schemas:
+        CouponCreate:
+            type: object
+            properties:
+                code:
+                    type: string
+                    example: SAVE20
+                    description: Unique code for the coupon
+                startDate:
+                    type: string
+                    format: date
+                    example: 2024-01-01
+                    description: Start date of the coupon's validity
+                endDate:
+                    type: string
+                    format: date
+                    example: 2024-12-31
+                    description: End date of the coupon's validity
+                discount:
+                    type: number
+                    format: float
+                    example: 15.0
+                    description: Discount percentage
+
+        CouponUpdate:
+            type: object
+            properties:
+                startDate:
+                    type: string
+                    format: date
+                    example: 2024-01-01
+                endDate:
+                    type: string
+                    format: date
+                    example: 2024-12-31
+                discount:
+                    type: number
+                    format: float
+                    example: 20.0
+
+        CouponResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 1
+                code:
+                    type: string
+                    example: SAVE20
+                startDate:
+                    type: string
+                    format: date
+                    example: 2024-01-01
+                endDate:
+                    type: string
+                    format: date
+                    example: 2024-12-31
+                discount:
+                    type: number
+                    format: float
+                    example: 15.0
