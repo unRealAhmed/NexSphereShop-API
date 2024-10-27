@@ -1,50 +1,53 @@
-import { FilterQuery } from 'mongoose'
-import { IColor } from '../../models'
+import { IColor } from '../../models/color.model'
 import { ColorRepository } from '../../repositories'
+import { ErrorMessages } from '../../shared/constants/errorMessages'
+import { NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
+import { CreateColorDTO, UpdateColorDTO } from './color.dtos'
 
 export class ColorService {
-    private readonly colorRepo: ColorRepository
+    private readonly colorRepository: ColorRepository
+
     constructor() {
-        this.colorRepo = new ColorRepository()
+        this.colorRepository = new ColorRepository()
     }
 
-    async getAllColors(
-        filter?: FilterQuery<Partial<IColor>>,
-        skip?: number,
-        limit?: number,
-        sortField: keyof IColor = 'createdAt',
-        sortDirection: -1 | 1 = -1,
-    ): Promise<IColor[]> {
-        return this.colorRepo.findAll({
-            filter,
-            skip,
-            take: limit,
-            sort: sortField as string,
-            sortDirection,
+    async createColor(body: CreateColorDTO, userId: ID): Promise<IColor> {
+        const color = await this.colorRepository.create({
+            name: body.name,
+            hexCode: body.hexCode,
+            createdBy: userId,
         })
+        return color
     }
 
-    async getColorByName(name: string): Promise<IColor> {
-        return this.colorRepo.findOne({ name })
+    async getAllColors(): Promise<IColor[]> {
+        return this.colorRepository.findAll()
     }
 
-    async createColor(data: { name: string; userId: ID }): Promise<IColor> {
-        const color = await this.colorRepo.findOne({ name: data.name })
-        if (color) {
-            throw new Error('Color already exists')
+    async getColor(colorId: ID): Promise<IColor> {
+        const color = await this.colorRepository.findById(colorId)
+        if (!color) {
+            throw new NotFoundError(ErrorMessages.COLOR_NOT_FOUND)
         }
-        return this.colorRepo.create({
-            name: data.name.toLowerCase(),
-            user: data.userId,
-        })
+        return color
     }
 
-    async updateColor(id: ID, name: string): Promise<IColor> {
-        return this.colorRepo.updateById(id, { name })
+    async updateColor(colorId: ID, body: UpdateColorDTO): Promise<IColor> {
+        const colorExists = await this.colorRepository.findById(colorId)
+        if (!colorExists) {
+            throw new NotFoundError(ErrorMessages.COLOR_NOT_FOUND)
+        }
+
+        return this.colorRepository.updateById(colorId, { ...body })
     }
 
-    async deleteColor(id: ID): Promise<IColor> {
-        return this.colorRepo.softDeleteById(id)
+    async deleteColor(colorId: ID): Promise<void> {
+        const color = await this.colorRepository.findById(colorId)
+        if (!color) {
+            throw new NotFoundError(ErrorMessages.COLOR_NOT_FOUND)
+        }
+
+        await this.colorRepository.deleteById(colorId)
     }
 }
