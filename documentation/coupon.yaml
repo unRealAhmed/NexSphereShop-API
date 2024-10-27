@@ -183,6 +183,52 @@ paths:
                                         type: string
                                         example: Coupon not found
 
+    /api/coupons/apply/{code}:
+        post:
+            tags:
+                - Coupons
+            summary: Apply a coupon using its code
+            parameters:
+                - in: path
+                  name: code
+                  required: true
+                  schema:
+                      type: string
+                  description: Code of the coupon to apply
+            responses:
+                200:
+                    description: Coupon successfully applied
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/CouponResponse'
+                404:
+                    description: Coupon not found or inactive
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Coupon not found or inactive
+            examples:
+                application/json:
+                    value:
+                        status: 'success'
+                        data:
+                            code: 'SUMMER2024'
+                            discount: 15
+
 components:
     schemas:
         CouponCreate:
