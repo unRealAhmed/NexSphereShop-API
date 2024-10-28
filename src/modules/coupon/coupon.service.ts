@@ -1,119 +1,110 @@
-import { ICoupon } from '../../models'
+import { ICoupon } from '../../models/coupon.model'
 import { CouponRepository } from '../../repositories'
+import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
+import { ApplyCouponDTO, CreateCouponDTO, UpdateCouponDTO } from './coupon.dtos'
 
 export class CouponService {
-    private couponRepository: CouponRepository
+    private readonly couponRepository: CouponRepository
 
     constructor() {
         this.couponRepository = new CouponRepository()
     }
 
-    // Helper methods for coupon expiration and days left
-    private isExpired(endDate: Date): boolean {
-        return endDate < new Date()
-    }
+    async createCoupon(data: CreateCouponDTO, user: ID): Promise<ICoupon> {
+        const startDate = new Date(data.startDate)
+        const endDate = new Date(data.endDate)
 
-    private daysLeft(endDate: Date): number {
-        const currentDate = new Date()
-        const timeDiff = endDate.getTime() - currentDate.getTime()
-        return Math.ceil(timeDiff / (1000 * 60 * 60 * 24))
-    }
-
-    // Validate coupon dates
-    private validateDates(startDate: Date, endDate: Date): void {
-        const now = new Date()
-        if (endDate < startDate) {
+        if (startDate < new Date()) {
             throw new BadRequestError(
-                'End date cannot be earlier than the start date',
+                ErrorMessages.START_DATE_MUST_BE_IN_FUTURE,
             )
         }
-        if (startDate < now) {
-            throw new BadRequestError('Start date cannot be in the past')
+
+        if (endDate < startDate) {
+            throw new BadRequestError(
+                ErrorMessages.END_DATE_MUST_BE_AFTER_START_DATE,
+            )
         }
-        if (endDate < now) {
-            throw new BadRequestError('End date cannot be in the past')
-        }
-    }
 
-    // Validate coupon discount
-    private validateDiscount(discount: number): void {
-        if (discount <= 0 || discount > 100) {
-            throw new BadRequestError('Discount must be between 1 and 100')
-        }
-    }
-
-    // Create Coupon
-    async createCoupon(data: ICoupon, userId: ID): Promise<ICoupon> {
-        const { startDate, endDate, discount, code } = data
-
-        this.validateDates(startDate, endDate)
-        this.validateDiscount(discount)
-
-        const existingCoupon = await this.couponRepository.exists({ code })
+        const existingCoupon = await this.couponRepository.findByCodeAndActive(
+            data.code,
+        )
         if (existingCoupon) {
-            throw new BadRequestError('Coupon already exists')
+            throw new BadRequestError(ErrorMessages.COUPON_ALREADY_EXISTS)
         }
 
-        const coupon = await this.couponRepository.create({
+        return this.couponRepository.create({
             ...data,
-            user: userId,
+            startDate,
+            endDate,
+            createdBy: user,
         })
-
-        return coupon
     }
 
-    // Get a single coupon with expiration logic
-    async getCoupon(couponId: ID): Promise<ICoupon> {
-        const coupon = await this.couponRepository.findById(couponId)
-
-        if (this.isExpired(coupon.endDate)) {
-            throw new BadRequestError('Coupon is expired')
+    async applyCoupon({ code }: ApplyCouponDTO): Promise<ICoupon> {
+        const coupon = await this.couponRepository.findByCodeAndActive(code)
+        if (!coupon) {
+            throw new NotFoundError(ErrorMessages.COUPON_NOT_FOUND_OR_INACTIVE)
         }
 
+        await this.incrementRedemption(coupon._id)
+
         return coupon
     }
 
-    // Get all coupons
-    async getAllCoupons(): Promise<ICoupon[]> {
+    async validateCoupon(code: string): Promise<boolean> {
+        const coupon = await this.couponRepository.findByCodeAndActive(code)
+        return !!coupon
+    }
+
+    async deactivateExpiredCoupons(): Promise<void> {
+        const { success, modifiedCount } =
+            await this.couponRepository.updateMany(
+                {
+                    endDate: { $lt: new Date() },
+                    isActive: true,
+                },
+                { isActive: false },
+            )
+
+        if (!success || modifiedCount === 0) {
+            throw new BadRequestError(ErrorMessages.NO_EXPIRED_COUPONS_FOUND)
+        }
+    }
+
+    async incrementRedemption(couponId: ID): Promise<void> {
+        await this.couponRepository.updateById(couponId, {
+            $inc: { redemptionCount: 1 },
+        })
+    }
+
+    async findAll(): Promise<ICoupon[]> {
         return this.couponRepository.findAll()
     }
 
-    // Update Coupon
-    async updateCoupon(couponId: ID, data: Partial<ICoupon>): Promise<ICoupon> {
-        const { startDate, endDate, discount } = data
-
-        // Validate discount and dates
-        if (startDate && endDate) {
-            this.validateDates(startDate, endDate)
-        }
-        if (discount !== undefined) {
-            this.validateDiscount(discount)
-        }
-
-        const coupon = await this.couponRepository.updateById(couponId, data)
-
+    async findOne(couponId: ID): Promise<ICoupon> {
+        const coupon = await this.couponRepository.findById(couponId)
         if (!coupon) {
-            throw new NotFoundError('Coupon not found')
+            throw new NotFoundError(ErrorMessages.COUPON_NOT_FOUND)
         }
-
         return coupon
     }
 
-    // Delete Coupon
-    async deleteCoupon(couponId: ID): Promise<void> {
-        await this.couponRepository.deleteById(couponId)
+    async update(couponId: ID, data: UpdateCouponDTO): Promise<ICoupon> {
+        const couponExists = await this.couponRepository.findById(couponId)
+        if (!couponExists) {
+            throw new NotFoundError(ErrorMessages.COUPON_NOT_FOUND)
+        }
+        return this.couponRepository.updateById(couponId, data)
     }
 
-    // Additional helper method to get coupon details with expiration status and days left
-    async getCouponWithExpirationInfo(
-        couponId: ID,
-    ): Promise<{ coupon: ICoupon; isExpired: boolean; daysLeft: number }> {
-        const coupon = await this.couponRepository.findById(couponId)
-        const isExpired = this.isExpired(coupon.endDate)
-        const daysLeft = this.daysLeft(coupon.endDate)
-
-        return { coupon, isExpired, daysLeft }
+    async delete(couponId: ID): Promise<void> {
+        const couponExists = await this.couponRepository.findById(couponId)
+        if (!couponExists) {
+            throw new NotFoundError(ErrorMessages.COUPON_NOT_FOUND)
+        }
+        await this.couponRepository.deleteById(couponId)
     }
 }
