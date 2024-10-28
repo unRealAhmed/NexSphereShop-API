@@ -1,97 +1,91 @@
-// import Coupon from '@models/coupon.model'
-// import AppError from '@shared/utils/appErrors'
-// import asyncHandler from '@shared/utils/asyncHandler'
+import { NextFunction, Request, Response } from 'express'
+import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
+import { CouponService } from './coupon.service'
 
-// export const createCoupon = asyncHandler(async (req, res, next) => {
-//     const { code, startDate, endDate, discount } = req.body
-//     //check if coupon already exists
-//     const couponsExists = await Coupon.findOne({
-//         code,
-//     })
-//     if (couponsExists) {
-//         return next(new AppError('Coupon already exists', 400))
-//     }
-//     //check if discount is a number
-//     if (Number.isNaN(discount)) {
-//         return next(new AppError('Discount value must be a number', 400))
-//     }
-//     //create coupon
-//     const coupon = await Coupon.create({
-//         code: code,
-//         startDate,
-//         endDate,
-//         discount,
-//         user: req.user.id,
-//     })
-//     //send the response
-//     res.status(201).json({
-//         status: 'success',
-//         message: 'Coupon created successfully',
-//         coupon,
-//     })
-// })
+export class CouponController {
+    private couponService: CouponService
 
-// export const getAllCoupons = asyncHandler(async (req, res) => {
-//     const coupons = await Coupon.find()
-//     res.status(200).json({
-//         status: 'success',
-//         message: 'All coupons',
-//         coupons,
-//     })
-// })
+    constructor() {
+        this.couponService = new CouponService()
+    }
 
-// export const getCoupon = asyncHandler(async (req, res, next) => {
-//     const coupon = await Coupon.findById(req.params.id)
-//     //check if is not found
-//     if (coupon === null) {
-//         return next(new AppError('Coupon not found', 404))
-//     }
-//     //check if expired
-//     // if (coupon.isExpired) {
-//     //     return next(new AppError('Coupon Expired', 400))
-//     // }
-//     res.json({
-//         status: 'success',
-//         message: 'Coupon fetched',
-//         coupon,
-//     })
-// })
+    async createCoupon(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.userId
+            const coupon = await this.couponService.createCoupon(
+                req.body,
+                userId!,
+            )
+            return res.status(201).json(coupon)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-// export const updateCoupon = asyncHandler(async (req, res, next) => {
-//     const { code, startDate, endDate, discount } = req.body
-//     const coupon = await Coupon.findByIdAndUpdate(
-//         req.params.id,
-//         {
-//             code: code?.toUpperCase(),
-//             discount,
-//             startDate,
-//             endDate,
-//         },
-//         {
-//             new: true,
-//         },
-//     )
+    async getAllCoupons(req: Request, res: Response, next: NextFunction) {
+        try {
+            const coupons = await this.couponService.findAll()
+            return res.status(200).json(coupons)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     if (!coupon) {
-//         return next(new AppError('No coupon with that id', 404))
-//     }
+    async getCoupon(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params
+            const coupon = await this.couponService.findOne(
+                convertToObjectId(id),
+            )
+            return res.status(200).json(coupon)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     res.json({
-//         status: 'success',
-//         message: 'Coupon updated successfully',
-//         coupon,
-//     })
-// })
+    async updateCoupon(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params
+            const updatedCoupon = await this.couponService.update(
+                convertToObjectId(id),
+                req.body,
+            )
+            return res.status(200).json(updatedCoupon)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-// export const deleteCoupon = asyncHandler(async (req, res, next) => {
-//     const coupon = await Coupon.findByIdAndDelete(req.params.id)
+    async deleteCoupon(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params
+            await this.couponService.delete(convertToObjectId(id))
+            return res.status(204).send()
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     if (!coupon) {
-//         return next(new AppError('No coupon with that id', 404))
-//     }
+    async applyCoupon(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { code } = req.body
+            const coupon = await this.couponService.applyCoupon(code)
+            return res.status(200).json(coupon)
+        } catch (error) {
+            next(error)
+        }
+    }
 
-//     res.json({
-//         status: 'success',
-//         message: 'Coupon deleted successfully',
-//     })
-// })
+    async deactivateExpiredCoupons(
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) {
+        try {
+            await this.couponService.deactivateExpiredCoupons()
+            return res.status(204).send()
+        } catch (error) {
+            next(error)
+        }
+    }
+}
