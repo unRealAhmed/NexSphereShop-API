@@ -4,7 +4,7 @@ import {
     CategoryRepository,
     ProductRepository,
 } from '../../repositories'
-import { ErrorMessages } from '../../shared/constants/errorMessages' // Import the error messages
+import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
 import { ID } from '../../shared/types'
