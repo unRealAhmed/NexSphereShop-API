@@ -84,6 +84,13 @@ export abstract class AbstractRepository<TDocument> {
             .exec() as TDocument
     }
 
+    async updateMany(
+        filterQuery: FilterQuery<TDocument>,
+        updateQuery: UpdateQuery<TDocument>,
+    ): Promise<void> {
+        await this.model.updateMany(filterQuery, updateQuery).exec()
+    }
+
     async deleteById(id: ID): Promise<TDocument> {
         return this.model.findByIdAndDelete(id).exec() as TDocument
     }
