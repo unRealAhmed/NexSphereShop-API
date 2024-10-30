@@ -3,7 +3,7 @@ import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
 
 export interface IReview extends AbstractDocument {
-    user: ID
+    createdBy: ID
     product: ID
     review: string
     rating: number
@@ -11,7 +11,7 @@ export interface IReview extends AbstractDocument {
 
 const reviewSchema = new Schema<IReview>(
     {
-        user: {
+        createdBy: {
             type: Schema.Types.ObjectId,
             ref: 'User',
             required: true,
@@ -39,7 +39,6 @@ const reviewSchema = new Schema<IReview>(
     },
 )
 
-// Unique index to ensure one review per user per product
 reviewSchema.index({ product: 1, user: 1 }, { unique: true })
 
 const Review = mongoose.model<IReview>('Review', reviewSchema)
