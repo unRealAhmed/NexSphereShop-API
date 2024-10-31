@@ -1,0 +1,244 @@
+openapi: 3.0.0
+info:
+    title: Review API
+    description: API for managing product reviews (CRUD operations)
+    version: 1.0.0
+    contact:
+        name: NexSphereShop-API
+        email: support@nexsphereshop.com
+
+tags:
+    - name: Reviews
+      description: Endpoints related to review management
+
+paths:
+    /api/reviews/{productId}:
+        post:
+            tags:
+                - Reviews
+            summary: Create a new review for a product
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the product to review
+            requestBody:
+                description: Review creation data
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReviewCreate'
+            responses:
+                201:
+                    description: Review successfully created
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ReviewResponse'
+                400:
+                    description: Bad Request - Invalid input
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Invalid review data
+
+    /api/reviews:
+        get:
+            tags:
+                - Reviews
+            summary: Get all reviews
+            responses:
+                200:
+                    description: List of reviews retrieved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/ReviewResponse'
+
+    /api/reviews/{id}:
+        get:
+            tags:
+                - Reviews
+            summary: Get a review by ID
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the review to retrieve
+            responses:
+                200:
+                    description: Review found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ReviewResponse'
+                404:
+                    description: Review not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Review not found
+
+        patch:
+            tags:
+                - Reviews
+            summary: Update a review
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the review to update
+            requestBody:
+                description: Data to update review details
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ReviewUpdate'
+            responses:
+                200:
+                    description: Review successfully updated
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: success
+                                    data:
+                                        $ref: '#/components/schemas/ReviewResponse'
+                404:
+                    description: Review not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Review not found
+
+        delete:
+            tags:
+                - Reviews
+            summary: Delete a review by ID
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the review to delete
+            responses:
+                204:
+                    description: Review successfully deleted
+                404:
+                    description: Review not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: error
+                                    message:
+                                        type: string
+                                        example: Review not found
+
+components:
+    schemas:
+        ReviewCreate:
+            type: object
+            properties:
+                review:
+                    type: string
+                    example: 'This is a great product!'
+                rating:
+                    type: number
+                    example: 5
+            required:
+                - review
+                - rating
+
+        ReviewUpdate:
+            type: object
+            properties:
+                review:
+                    type: string
+                    example: 'Updated review text.'
+                rating:
+                    type: number
+                    example: 4
+
+        ReviewResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: '1'
+                review:
+                    type: string
+                    example: 'This is a great product!'
+                rating:
+                    type: number
+                    example: 5
+                createdBy:
+                    type: string
+                    example: 'userId'
+                product:
+                    type: string
+                    example: 'productId'
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: '2024-10-31T12:00:00Z'
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: '2024-10-31T12:00:00Z'
