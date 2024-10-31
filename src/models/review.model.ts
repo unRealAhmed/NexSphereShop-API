@@ -32,11 +32,11 @@ const reviewSchema = new Schema<IReview>(
             min: 1,
             max: 5,
         },
-        // order: {
-        //     type: Schema.Types.ObjectId,
-        //     ref: Order.name,
-        //     required: true,
-        // },
+        order: {
+            type: Schema.Types.ObjectId,
+            ref: 'Order',
+            required: true,
+        },
     },
     {
         timestamps: true,
