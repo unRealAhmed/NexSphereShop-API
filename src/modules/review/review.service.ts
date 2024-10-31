@@ -1,5 +1,5 @@
 import Product from '../../models/product.model'
-import { OrderRepository, ReviewRepository } from '../../repositories'
+import { ReviewRepository } from '../../repositories'
 import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
@@ -9,12 +9,12 @@ import { CreateReviewDTO, UpdateReviewDTO } from './review.dtos'
 export class ReviewService {
     private reviewRepository: ReviewRepository
     private productService: ProductService
-    private orderRepository: OrderRepository
+    // private orderRepository: OrderRepository
 
     constructor() {
         this.reviewRepository = new ReviewRepository()
         this.productService = new ProductService()
-        this.orderRepository = new OrderRepository()
+        // this.orderRepository = new OrderRepository()
     }
 
     async getAllReviews(filter: Record<string, any> = {}) {
