@@ -1,9 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 import { ID } from '../shared/types'
 import { AbstractDocument } from './abstract.model'
-import Order from './order.model' // Import the Order model
-import Product from './product.model'
-import User from './user.model'
 
 export interface IReview extends AbstractDocument {
     createdBy: ID
@@ -17,12 +14,12 @@ const reviewSchema = new Schema<IReview>(
     {
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: User.name,
+            ref: 'User',
             required: true,
         },
         product: {
             type: Schema.Types.ObjectId,
-            ref: Product.name,
+            ref: 'Product',
             required: true,
         },
         review: {
@@ -35,11 +32,11 @@ const reviewSchema = new Schema<IReview>(
             min: 1,
             max: 5,
         },
-        order: {
-            type: Schema.Types.ObjectId,
-            ref: Order.name,
-            required: true,
-        },
+        // order: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: Order.name,
+        //     required: true,
+        // },
     },
     {
         timestamps: true,
