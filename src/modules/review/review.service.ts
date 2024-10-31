@@ -1,5 +1,5 @@
 import Product from '../../models/product.model'
-import { ReviewRepository } from '../../repositories'
+import { OrderRepository, ReviewRepository } from '../../repositories'
 import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { ID } from '../../shared/types'
@@ -9,12 +9,12 @@ import { CreateReviewDTO, UpdateReviewDTO } from './review.dtos'
 export class ReviewService {
     private reviewRepository: ReviewRepository
     private productService: ProductService
-    // private orderRepository: OrderRepository
+    private orderRepository: OrderRepository
 
     constructor() {
         this.reviewRepository = new ReviewRepository()
         this.productService = new ProductService()
-        // this.orderRepository = new OrderRepository()
+        this.orderRepository = new OrderRepository()
     }
 
     async getAllReviews(filter: Record<string, any> = {}) {
@@ -39,15 +39,15 @@ export class ReviewService {
             throw new NotFoundError(ErrorMessages.PRODUCT_NOT_FOUND)
         }
 
-        // const userOrder = await this.orderRepository.findOne({
-        //     user: user,
-        //     product: product,
-        // })
-        // if (!userOrder) {
-        //     throw new BadRequestError(
-        //         ErrorMessages.YOU_HAVE_NOT_PURCHASED_THIS_PRODUCT,
-        //     )
-        // }
+        const userOrder = await this.orderRepository.findOne({
+            user: user,
+            product: product,
+        })
+        if (!userOrder) {
+            throw new BadRequestError(
+                ErrorMessages.YOU_HAVE_NOT_PURCHASED_THIS_PRODUCT,
+            )
+        }
 
         const existingReview = await this.reviewRepository.exists({
             createdBy: user,
@@ -64,7 +64,7 @@ export class ReviewService {
             product,
             review,
             rating,
-            // order: user,
+            order: userOrder._id,
         })
 
         await this.calcAverageRatings(product)
