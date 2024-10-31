@@ -7,6 +7,7 @@ import color from '../modules/color/color.routes'
 import coupon from '../modules/coupon/coupon.routes'
 import healthCheck from '../modules/healthCheck'
 import product from '../modules/product/product.routes'
+import review from '../modules/review/review.routes'
 import user from '../modules/user/user.routes'
 
 export default function (app: Express, port: number) {
@@ -18,6 +19,7 @@ export default function (app: Express, port: number) {
     app.use('/api/brands', brand)
     app.use('/api/colors', color)
     app.use('/api/coupons', coupon)
+    app.use('/api/reviews', review)
 
     swaggerDocs(app, port)
 }
