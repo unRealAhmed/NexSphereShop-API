@@ -8,7 +8,11 @@ import { ErrorMessages } from '../../shared/constants/errorMessages'
 import { BadRequestError, NotFoundError } from '../../shared/errors/errors'
 import { convertToObjectId } from '../../shared/helpers/convertToObjectId'
 import { ID } from '../../shared/types'
-import { CreateProductDTO, UpdateProductDTO } from './product.dtos'
+import {
+    CreateProductDTO,
+    ProductRatingsUpdate,
+    UpdateProductDTO,
+} from './product.dtos'
 
 export class ProductService {
     private readonly productRepository: ProductRepository
@@ -143,5 +147,12 @@ export class ProductService {
 
     async getLowStockProducts(threshold: number): Promise<IProduct[]> {
         return this.productRepository.findLowStock(threshold)
+    }
+
+    async updateProductRatings(
+        productId: ID,
+        ratingsData: ProductRatingsUpdate,
+    ) {
+        return this.productRepository.updateById(productId, ratingsData)
     }
 }
