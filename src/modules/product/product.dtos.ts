@@ -10,3 +10,8 @@ export type ApplyDiscountDTO = z.infer<typeof productSchemas.applyDiscount.body>
 // export type FindProductByIdDTO = z.infer<
 //     typeof productSchemas.findProductById.params
 // >
+
+export interface ProductRatingsUpdate {
+    feedbacks: number
+    averageRating: number
+}
