@@ -5,6 +5,7 @@ export const ErrorMessages = {
     PRODUCT_NOT_FOUND: 'Product not found',
     COLOR_NOT_FOUND: 'color not found',
     COUPON_NOT_FOUND: 'coupon not found',
+    REVIEW_NOT_FOUND: 'Review not found',
 
     // User related errors
     EMAIL_ALREADY_IN_USE: 'Email is already in use',
@@ -36,4 +37,12 @@ export const ErrorMessages = {
     START_DATE_MUST_BE_IN_FUTURE: 'Start date must be today or in the future.',
     END_DATE_MUST_BE_AFTER_START_DATE:
         'End date must be equal to or after the start date.',
+
+    // Review related errors
+    YOU_HAVE_ALREADY_REVIEWED_THIS_PRODUCT:
+        'You have already reviewed this product.',
+    YOU_CAN_ONLY_EDIT_YOUR_OWN_REVIEWS: 'You can only edit your own reviews',
+    YOU_CAN_ONLY_DELETE_YOUR_OWN_REVIEWS:
+        'You can only delete your own reviews',
+    YOU_HAVE_NOT_PURCHASED_THIS_PRODUCT: "you didn't purchase this product",
 }
